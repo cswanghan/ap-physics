@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AP Physics 1 · FRQ 练习</title>
+    <title>AP Physics 1 · FRQ Practice | Free Response Questions</title>
+    <meta name="description" content="Practice AP Physics 1 free response questions with timed mode and official scoring guidelines. 5 FRQ from 2024.">
     <script src="auth-guard.js"></script>
     <script src="analytics.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Raleway:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
@@ -129,7 +130,10 @@
             color: var(--ink); margin-bottom: 10px;
         }
         .answer-reveal p {
-            font-size: 0.85rem; color: var(--ink-med); line-height: 1.7;
+            font-size: 0.85rem; color: var(--ink-med); line-height: 1.9;
+        }
+        .answer-reveal b {
+            color: var(--ink); display: inline-block; margin-top: 8px;
         }
 
         /* Sidebar */
@@ -440,7 +444,7 @@
                 <span class="q-meta-line"></span>
             </div>
             <div class="q-number">FRQ ${qNum}</div>
-            <div class="q-title">${I18n.t('practice_mode')}</div>
+            <div class="q-title">${qData?.title || ''} · ${qData?.topic || ''} · ${qData?.points || ''}pts</div>
         `;
 
         if (qData && qData.image) {

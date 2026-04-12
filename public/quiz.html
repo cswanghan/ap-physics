@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AP Physics 1 · 在线练习</title>
+    <title>AP Physics 1 · MCQ Practice | 70 Questions Auto-Graded</title>
+    <meta name="description" content="Practice AP Physics 1 multiple choice questions online. 70 MCQ from 2024 exam, auto-graded with AP score estimation.">
     <script src="auth-guard.js"></script>
     <script src="analytics.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Raleway:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
@@ -46,12 +47,12 @@
         }
         .quiz-topbar .back-btn:hover { color: var(--primary-dark); }
 
-        /* 3-column grid */
+        /* 2-column grid: question+options | sidebar */
         .quiz-layout {
             display: grid;
-            grid-template-columns: 1fr 340px 240px;
+            grid-template-columns: 1fr 240px;
             gap: 20px;
-            max-width: 1200px;
+            max-width: 1000px;
             width: 100%;
             min-height: calc(100vh - 100px);
         }
@@ -78,14 +79,10 @@
             box-shadow: inset 1px 1px 3px rgba(0,0,0,0.15);
         }
 
-        .quiz-answer {
-            background: var(--paper);
-            border-radius: 12px;
-            padding: 32px 28px;
-            display: flex; flex-direction: column;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            overflow-y: auto;
-            max-height: calc(100vh - 100px);
+        .answer-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--ink-faint);
         }
 
         .quiz-sidebar {
@@ -421,23 +418,14 @@
         .modal-actions .btn { flex: 1; }
 
         /* Question transition */
-        .quiz-question.fade-out, .quiz-answer.fade-out {
+        .quiz-question.fade-out {
             opacity: 0; transform: translateY(6px);
         }
-        .quiz-question, .quiz-answer {
+        .quiz-question {
             transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
         /* Responsive */
-        @media (max-width: 1100px) {
-            .quiz-layout {
-                grid-template-columns: 1fr 220px;
-            }
-            .quiz-question { grid-column: 1; grid-row: 1; max-height: 50vh; }
-            .quiz-answer { grid-column: 1; grid-row: 2; max-height: none; }
-            .quiz-sidebar { grid-column: 2; grid-row: 1 / 3; }
-            .nav-grid { grid-template-columns: repeat(4, 1fr); }
-        }
         @media (max-width: 768px) {
             .quiz-layout {
                 grid-template-columns: 1fr;
@@ -498,23 +486,20 @@
 
         <!-- 3-column layout -->
         <div class="quiz-layout">
-            <!-- Question panel -->
+            <!-- Question + Answer panel (merged) -->
             <div class="quiz-question" id="questionPanel">
                 <div class="notebook-dots" id="notebookDots"></div>
                 <div id="questionContent">
                     <!-- Dynamically loaded -->
                 </div>
-            </div>
-
-            <!-- Answer panel -->
-            <div class="quiz-answer" id="answerPanel">
-                <div class="section-title" data-i18n="choose_answer">选择答案</div>
-                <div class="options" id="optionsContainer">
-                    <!-- Dynamically loaded -->
+                <div class="answer-section">
+                    <div class="section-title" data-i18n="choose_answer">选择答案</div>
+                    <div class="options" id="optionsContainer">
+                        <!-- Dynamically loaded -->
+                    </div>
+                    <div class="feedback" id="feedbackBox"></div>
+                    <div class="explanation-panel" id="explanationBox"></div>
                 </div>
-                <div class="feedback" id="feedbackBox"></div>
-                <div class="explanation-panel" id="explanationBox"></div>
-                <div class="right-spacer"></div>
                 <div class="action-bar" id="actionBar">
                     <button class="btn btn-ghost" id="prevBtn" onclick="prevQuestion()" data-i18n="btn_prev">← 上一题</button>
                     <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" data-i18n="btn_next">下一题 →</button>
@@ -802,10 +787,7 @@
 
         saveProgress();
 
-        // Auto-advance to next question after short delay
-        if (currentQ < TOTAL_Q - 1) {
-            setTimeout(() => nextQuestion(), 200);
-        }
+        // No auto-advance — let user review and click Next manually
     }
 
     function prevQuestion() {
@@ -877,13 +859,15 @@
             }
         }
 
-        // AP score conversion (simplified - roughly 70%+ for 5, etc.)
+        // AP score conversion based on historical AP Physics 1 cut scores
+        // MCQ is ~50% of composite; these thresholds approximate the full-exam curve
+        // applied to the MCQ-only raw score for practice estimation
         const pct = correct / TOTAL_Q;
         let apScore = 1;
-        if (pct >= 0.75) apScore = 5;
-        else if (pct >= 0.60) apScore = 4;
-        else if (pct >= 0.45) apScore = 3;
-        else if (pct >= 0.30) apScore = 2;
+        if (pct >= 0.70) apScore = 5;      // ~70%+ → 5
+        else if (pct >= 0.55) apScore = 4; // ~55-69% → 4
+        else if (pct >= 0.40) apScore = 3; // ~40-54% → 3
+        else if (pct >= 0.25) apScore = 2; // ~25-39% → 2
 
         showResults(correct, apScore);
     }

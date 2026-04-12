@@ -3,10 +3,73 @@
   "exam": "AP Physics 1",
   "totalQuestions": 5,
   "questions": [
-    {"number": 1, "points": 10, "image": "frq-01.png", "title": "Mathematical Routines"},
-    {"number": 2, "points": 12, "image": "frq-02.png", "title": "Transverting"},
-    {"number": 3, "points": 8, "image": "frq-03.png", "title": "Experimental Matrix"},
-    {"number": 4, "points": 12, "image": "frq-04.png", "title": "Qualitative/Quantitative Translation"},
-    {"number": 5, "points": 8, "image": "frq-05.png", "title": "Paragraph Argument Short Answer"}
+    {
+      "number": 1,
+      "points": 7,
+      "image": "frq-01.png",
+      "title": "Short Answer",
+      "topic": "Energy & Circular Motion",
+      "parts": [
+        {"part": "a", "points": 2, "desc": "Energy bar diagram"},
+        {"part": "b", "points": 2, "desc": "Speed derivation using conservation of energy"},
+        {"part": "c(i)", "points": 2, "desc": "Free body diagram at top of loop"},
+        {"part": "c(ii)", "points": 1, "desc": "Minimum height explanation"}
+      ],
+      "answer": "<b>Part (a)</b> — 2 pts<br>Draw energy bars whose total heights add to 6 units; U<sub>g</sub> bar at height 2 units, K bar at height 4 units.<br><br><b>Part (b)</b> — 2 pts<br>Use conservation of energy: E<sub>i</sub> = E<sub>f</sub><br>Mg(6R) = Mg(2R) + ½Mv²<br>4gR = ½v² → <b>v = √(8gR)</b><br><br><b>Part (c)(i)</b> — 2 pts<br>At Point C (top of loop): draw a downward arrow labeled F<sub>g</sub> (gravitational force) and a downward arrow labeled F<sub>N</sub> (normal force). Both forces point toward the center of the loop.<br><br><b>Part (c)(ii)</b> — 1 pt<br>If released from height 4R, by conservation of energy the block would have zero speed at Point C. With zero speed, the block cannot maintain contact with the loop and will fall. Therefore the claim is incorrect."
+    },
+    {
+      "number": 2,
+      "points": 12,
+      "image": "frq-02.png",
+      "title": "Experimental Design",
+      "topic": "Simple Harmonic Motion & Impulse-Momentum",
+      "parts": [
+        {"part": "a", "points": 4, "desc": "Design experiment to determine spring constant k"},
+        {"part": "b(i)", "points": 1, "desc": "Identify quantities for linear graph"},
+        {"part": "b(ii)", "points": 1, "desc": "Relate slope to k"},
+        {"part": "c(i)", "points": 3, "desc": "Calculate change in kinetic energy"},
+        {"part": "c(ii)", "points": 2, "desc": "Change in momentum from force-time graph"},
+        {"part": "c(iii)", "points": 1, "desc": "Confirm momentum change with velocity-time graph"}
+      ],
+      "answer": "<b>Part (a)</b> — 4 pts<br>Procedure: Measure mass with digital scale. Hang cylinder from spring, pull down and release to set into oscillatory motion. Use stopwatch to measure period of multiple oscillations. Repeat with different masses to reduce uncertainty.<br><br><b>Part (b)(i)</b> — 1 pt<br>Plot m vs. T² (mass vs. period squared) to get a linear graph. Slope = k/(4π²).<br><br><b>Part (b)(ii)</b> — 1 pt<br>k = (slope) × 4π²<br><br><b>Part (c)(i)</b> — 3 pts<br>ΔK = K<sub>f</sub> − K<sub>i</sub> = ½mv<sub>f</sub>² − ½mv<sub>i</sub>²<br>= ½(0.25)(0)² − ½(0.25)(0.3)²<br><b>ΔK ≈ −0.0113 J</b><br><br><b>Part (c)(ii)</b> — 2 pts<br>The area under the force-time graph from t = 0.5 s to t = 2.5 s represents the impulse (change in momentum). The area is approximately <b>zero</b>.<br><br><b>Part (c)(iii)</b> — 1 pt<br>The velocity-time graph shows velocity is 0.3 m/s at both t = 0.5 s and t = 2.5 s. Since p = mv, momentum is the same at both times, confirming Δp = 0."
+    },
+    {
+      "number": 3,
+      "points": 12,
+      "image": "frq-03.png",
+      "title": "Qualitative/Quantitative Translation",
+      "topic": "Torque & Rotational Equilibrium",
+      "parts": [
+        {"part": "a", "points": 3, "desc": "Free body diagram of beam"},
+        {"part": "b", "points": 2, "desc": "Compare tensions at different angles"},
+        {"part": "c", "points": 3, "desc": "Derive expression for tension"},
+        {"part": "d", "points": 2, "desc": "Relate derivation to qualitative reasoning"},
+        {"part": "e", "points": 2, "desc": "Angular speed vs. time graph"}
+      ],
+      "answer": "<b>Part (a)</b> — 3 pts<br>Free body diagram: gravitational force F<sub>g</sub> downward at center, tension F<sub>T</sub> upward-left at right end, hinge force F<sub>H</sub> at left end. Three vectors must form an equilibrium system.<br><br><b>Part (b)</b> — 2 pts<br>F<sub>T2</sub> > F<sub>T1</sub>. When the angle decreases, the perpendicular component of tension must remain the same to balance the torque. A smaller angle means larger total tension is needed.<br><br><b>Part (c)</b> — 3 pts<br>Στ = 0 (equilibrium)<br>(F<sub>g</sub>)(L/2)(sin 90°) − F<sub>T</sub>(L)(sin θ) = 0<br>Mg(L/2) = F<sub>T</sub>(L)(sin θ)<br><b>F<sub>T</sub> = Mg / (2 sin θ)</b><br><br><b>Part (d)</b> — 2 pts<br>The equation shows F<sub>T</sub> is inversely proportional to sin θ. For θ < 90°, as θ decreases, sin θ decreases, so F<sub>T</sub> increases. This confirms the reasoning in part (b).<br><br><b>Part (e)</b> — 2 pts<br>Draw a graph of angular speed vs. time that is monotonically increasing and concave down (starts steep, levels off)."
+    },
+    {
+      "number": 4,
+      "points": 7,
+      "image": "frq-04.png",
+      "title": "Paragraph Argument",
+      "topic": "Gravitation & Energy",
+      "parts": [
+        {"part": "a", "points": 2, "desc": "Compare work done on different planets"},
+        {"part": "b", "points": 5, "desc": "Paragraph argument about pendulum period"}
+      ],
+      "answer": "<b>Part (a)</b> — 2 pts<br>On Planet X (larger radius, same mass), gravitational force is smaller (F = GMm/R²). Since the sphere travels the same vertical distance on both planets, and work = force × distance, less work is done on Planet X.<br><br><b>Part (b)</b> — 5 pts<br>T = 2π√(L/g). On Planet Y, the gravitational force is larger (larger mass), so g is larger. A larger g means a smaller period. However, the increased gravitational force could stretch the string, increasing the pendulum length L. Since T increases with L, a longer string could lead to a larger period. Therefore, the effect on the period depends on whether the change in g or the change in L dominates."
+    },
+    {
+      "number": 5,
+      "points": 8,
+      "image": "frq-05.png",
+      "title": "Paragraph Argument Short Answer",
+      "topic": "Waves & Sound",
+      "parts": [
+        {"part": "full", "points": 8, "desc": "Complete response"}
+      ],
+      "answer": "Refer to the official AP Physics 1 2024 Scoring Guidelines for the complete rubric. Download the scoring guide from the Papers section for full details."
+    }
   ]
 }
