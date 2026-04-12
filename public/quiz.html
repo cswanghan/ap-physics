@@ -47,12 +47,12 @@
         }
         .quiz-topbar .back-btn:hover { color: var(--primary-dark); }
 
-        /* 2-column grid: question+options | sidebar */
+        /* 3-column grid: question | options | sidebar */
         .quiz-layout {
             display: grid;
-            grid-template-columns: 1fr 240px;
+            grid-template-columns: 1fr 340px 240px;
             gap: 20px;
-            max-width: 1000px;
+            max-width: 1200px;
             width: 100%;
             min-height: calc(100vh - 100px);
         }
@@ -79,10 +79,14 @@
             box-shadow: inset 1px 1px 3px rgba(0,0,0,0.15);
         }
 
-        .answer-section {
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid var(--ink-faint);
+        .quiz-answer {
+            background: var(--paper);
+            border-radius: 12px;
+            padding: 32px 28px;
+            display: flex; flex-direction: column;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            overflow-y: auto;
+            max-height: calc(100vh - 100px);
         }
 
         .quiz-sidebar {
@@ -418,14 +422,23 @@
         .modal-actions .btn { flex: 1; }
 
         /* Question transition */
-        .quiz-question.fade-out {
+        .quiz-question.fade-out, .quiz-answer.fade-out {
             opacity: 0; transform: translateY(6px);
         }
-        .quiz-question {
+        .quiz-question, .quiz-answer {
             transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
         /* Responsive */
+        @media (max-width: 1100px) {
+            .quiz-layout {
+                grid-template-columns: 1fr 220px;
+            }
+            .quiz-question { grid-column: 1; grid-row: 1; max-height: 50vh; }
+            .quiz-answer { grid-column: 1; grid-row: 2; max-height: none; }
+            .quiz-sidebar { grid-column: 2; grid-row: 1 / 3; }
+            .nav-grid { grid-template-columns: repeat(4, 1fr); }
+        }
         @media (max-width: 768px) {
             .quiz-layout {
                 grid-template-columns: 1fr;
@@ -486,20 +499,23 @@
 
         <!-- 3-column layout -->
         <div class="quiz-layout">
-            <!-- Question + Answer panel (merged) -->
+            <!-- Question panel -->
             <div class="quiz-question" id="questionPanel">
                 <div class="notebook-dots" id="notebookDots"></div>
                 <div id="questionContent">
                     <!-- Dynamically loaded -->
                 </div>
-                <div class="answer-section">
-                    <div class="section-title" data-i18n="choose_answer">选择答案</div>
-                    <div class="options" id="optionsContainer">
-                        <!-- Dynamically loaded -->
-                    </div>
-                    <div class="feedback" id="feedbackBox"></div>
-                    <div class="explanation-panel" id="explanationBox"></div>
+            </div>
+
+            <!-- Answer panel -->
+            <div class="quiz-answer" id="answerPanel">
+                <div class="section-title" data-i18n="choose_answer">选择答案</div>
+                <div class="options" id="optionsContainer">
+                    <!-- Dynamically loaded -->
                 </div>
+                <div class="feedback" id="feedbackBox"></div>
+                <div class="explanation-panel" id="explanationBox"></div>
+                <div class="right-spacer"></div>
                 <div class="action-bar" id="actionBar">
                     <button class="btn btn-ghost" id="prevBtn" onclick="prevQuestion()" data-i18n="btn_prev">← 上一题</button>
                     <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" data-i18n="btn_next">下一题 →</button>
