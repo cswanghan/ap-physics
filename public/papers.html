@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics 1 · 历年真题</title>
+    <script src="analytics.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Noto+Serif+SC:wght@400;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #4A90D9;
+            --primary-dark: #2C5282;
+            --primary-light: #E8F0F8;
+            --primary-bg: #F0F6FC;
+            --bg: #F5F7FA;
+            --paper: #FFFFFF;
+            --ink: #1A202C;
+            --ink-light: #718096;
+            --warm: #E2E8F0;
+            --font-serif: 'Playfair Display', 'Noto Serif SC', serif;
+            --font-sans: 'Raleway', 'Noto Serif SC', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--ink);
+        }
+
+        .page {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        .site-header {
+            text-align: center;
+            margin-bottom: 48px;
+            position: relative;
+        }
+        .i18n-toggle {
+            position: absolute; top: 8px; right: 0;
+            padding: 4px 14px; border-radius: 999px;
+            border: 1px solid var(--warm); background: white;
+            color: var(--ink); font-size: 0.82rem; font-family: inherit;
+            cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
+        }
+        .i18n-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+        .site-header h1 {
+            font-family: var(--font-serif);
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            color: var(--primary-dark);
+        }
+
+        .site-header .tagline {
+            color: var(--ink-light);
+            font-size: 1rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.88rem;
+            margin-bottom: 32px;
+            padding: 6px 16px;
+            border: 1px solid var(--primary-light);
+            border-radius: 999px;
+            background: var(--primary-bg);
+            transition: all 0.2s;
+        }
+        .back-link:hover { background: var(--primary-light); color: var(--primary-dark); }
+
+        .papers-section {
+            margin-bottom: 48px;
+        }
+        .papers-section h2 {
+            font-family: var(--font-serif);
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .papers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .paper-card {
+            background: var(--paper);
+            border: 1px solid var(--warm);
+            border-radius: 14px;
+            padding: 24px;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .paper-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 6px 20px rgba(74,144,217,0.1);
+            transform: translateY(-2px);
+        }
+
+        .paper-year {
+            font-family: var(--font-serif);
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        .paper-desc {
+            color: var(--ink-light);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+        .paper-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .paper-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--primary-bg);
+            color: var(--primary);
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.15s;
+        }
+        .paper-link:hover { background: var(--primary); color: white; }
+
+        .coming-soon {
+            text-align: center;
+            padding: 40px;
+            color: var(--ink-light);
+            font-family: var(--font-serif);
+            font-size: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .site-header h1 { font-size: 1.8rem; }
+            .page { padding: 24px 16px 40px; }
+            .papers-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="site-header">
+            <button class="i18n-toggle" onclick="I18n.toggle()">EN</button>
+            <h1>AP Physics 1</h1>
+            <p class="tagline" data-i18n="tagline">历年真题 PDF</p>
+        </div>
+
+        <a class="back-link" href="index.html" data-i18n="back_home">← 返回首页</a>
+
+        <div class="papers-section">
+            <h2 data-i18n="section_2024">2024 年真题</h2>
+            <div class="papers-grid">
+                <div class="paper-card">
+                    <div class="paper-year">AP Physics 1</div>
+                    <div class="paper-desc" data-i18n="desc_2024">AP Physics 1 2024 选择题 + 简答题</div>
+                    <div class="paper-links">
+                        <a class="paper-link" href="papers/ap24-apc-physics-1-q1.pdf" target="_blank">
+                            📝 MCQ Part 1 (Q1-Q24)
+                        </a>
+                        <a class="paper-link" href="papers/ap24-apc-physics-1-q2.pdf" target="_blank">
+                            📝 MCQ Part 2 (Q25-Q50)
+                        </a>
+                        <a class="paper-link" href="papers/ap24-apc-physics-1-q3.pdf" target="_blank">
+                            📝 MCQ Part 3
+                        </a>
+                        <a class="paper-link" href="papers/ap24-apc-physics-1-q4.pdf" target="_blank">
+                            📝 MCQ Part 4
+                        </a>
+                        <a class="paper-link" href="papers/ap24-apc-physics-1-q5.pdf" target="_blank">
+                            📝 MCQ Part 5
+                        </a>
+                        <a class="paper-link" href="papers/ap24-frq-physics-1.pdf" target="_blank">
+                            📄 FRQ 简答题
+                        </a>
+                        <a class="paper-link" href="papers/ap24-sg-physics-1.pdf" target="_blank">
+                            🔑 Scoring Guide 答案
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="coming-soon" data-i18n="more_coming">
+            更多年份真题持续添加中...
+        </div>
+
+        <div class="site-footer" style="text-align:center;margin-top:48px;color:var(--ink-light);font-size:0.8rem;">
+            AP Physics 1 Practice System
+        </div>
+    </div>
+
+    <script>
+    window.I18N = {
+        zh: {
+            tagline: '历年真题 PDF',
+            back_home: '← 返回首页',
+            section_2024: '2024 年真题',
+            desc_2024: 'AP Physics 1 2024 选择题 + 简答题',
+            more_coming: '更多年份真题持续添加中...',
+        },
+        en: {
+            tagline: 'Past Papers PDF',
+            back_home: '← Back to Home',
+            section_2024: '2024 Exam',
+            desc_2024: 'AP Physics 1 2024 MCQ + FRQ',
+            more_coming: 'More years coming soon...',
+        }
+    };
+    </script>
+    <script src="i18n.js"></script>
+</body>
+</html>

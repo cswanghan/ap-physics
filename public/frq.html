@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics 1 · FRQ 练习</title>
+    <script src="auth-guard.js"></script>
+    <script src="analytics.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Raleway:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        :root {
+            --paper: #FDFBF9; --paper-shadow: #E2E8F0; --desk: #E8EEF4;
+            --ink: #1A202C; --ink-med: #4A5568; --ink-light: #A0AEC0; --ink-faint: rgba(26,32,44,0.08);
+            --primary: #4A90D9; --primary-dark: #2C5282; --primary-light: #BEE0F5;
+            --primary-bg: #EBF4FC; --primary-faint: rgba(74,144,217,0.15);
+            --font-serif: 'Lora', 'Noto Serif SC', serif;
+            --font-sans: 'Raleway', 'Noto Serif SC', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-sans); color: var(--ink);
+            background: var(--desk); background-image: radial-gradient(circle at 50% 0%, #F0F4F8, var(--desk));
+            min-height: 100vh;
+        }
+
+        .frq-wrapper {
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        /* Top bar */
+        .frq-topbar {
+            width: 100%; max-width: 900px;
+            margin: 0 auto 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.85rem; color: var(--ink-light);
+        }
+        .frq-topbar .back-btn {
+            background: none; border: none; font-family: inherit; font-size: 0.85rem;
+            color: var(--primary); cursor: pointer; padding: 4px 0;
+            text-decoration: none;
+        }
+        .frq-topbar .back-btn:hover { color: var(--primary-dark); }
+
+        /* Main layout */
+        .frq-layout {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 20px;
+        }
+
+        /* Question panel */
+        .frq-question {
+            background: var(--paper);
+            border-radius: 12px;
+            padding: 32px 36px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            overflow-y: auto;
+            max-height: calc(100vh - 100px);
+        }
+
+        .q-meta {
+            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+        }
+        .q-meta-line { height: 1px; flex: 1; background: var(--primary-faint); }
+
+        .q-number {
+            font-family: var(--font-serif); font-size: 2.2rem; font-weight: 400;
+            color: var(--ink); line-height: 1.1; margin-bottom: 4px;
+        }
+        .q-title {
+            font-family: var(--font-serif); font-size: 1rem; color: var(--ink-med); font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .frq-image {
+            width: 100%; max-width: 100%; border-radius: 6px; border: 1px solid var(--paper-shadow);
+            background: white; cursor: zoom-in;
+            min-height: 200px; object-fit: contain;
+            -webkit-user-select: none; user-select: none;
+        }
+        .frq-image.loading {
+            background: linear-gradient(90deg, #f0ece8 25%, #e8e4df 50%, #f0ece8 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+
+        .loading-msg {
+            text-align: center; padding: 60px 20px; color: var(--ink-light);
+            font-family: var(--font-serif); font-size: 1.1rem;
+        }
+        .loading-msg .spinner { font-size: 2rem; margin-bottom: 12px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* Practice area */
+        .practice-area {
+            margin-top: 20px;
+        }
+        .practice-label {
+            font-family: var(--font-serif); font-size: 0.9rem; font-weight: 600;
+            color: var(--ink); margin-bottom: 10px;
+        }
+        .practice-textarea {
+            width: 100%; min-height: 200px; border: 1.5px solid var(--ink-faint); border-radius: 10px;
+            padding: 14px; font-family: var(--font-serif); font-size: 0.95rem;
+            resize: vertical; background: var(--paper); color: var(--ink);
+            outline: none; line-height: 1.7;
+        }
+        .practice-textarea:focus { border-color: var(--primary); }
+        .practice-hint {
+            margin-top: 8px; font-size: 0.78rem; color: var(--ink-light); font-style: italic;
+        }
+
+        /* Answer reveal */
+        .answer-reveal {
+            margin-top: 20px; padding: 16px; border-radius: 10px;
+            background: linear-gradient(135deg, #f8f6f3, #f0ece8);
+            border: 1px solid var(--paper-shadow); display: none;
+        }
+        .answer-reveal.show { display: block; }
+        .answer-reveal h4 {
+            font-family: var(--font-serif); font-size: 0.95rem; font-weight: 600;
+            color: var(--ink); margin-bottom: 10px;
+        }
+        .answer-reveal p {
+            font-size: 0.85rem; color: var(--ink-med); line-height: 1.7;
+        }
+
+        /* Sidebar */
+        .frq-sidebar {
+            display: flex; flex-direction: column; gap: 16px;
+        }
+
+        .timer-block {
+            background: var(--paper);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .timer-row {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .timer-display {
+            font-family: var(--font-sans);
+            font-size: 2rem; font-weight: 600;
+            color: var(--primary); letter-spacing: 2px;
+        }
+        .timer-bar {
+            height: 3px; background: var(--paper-shadow); border-radius: 2px; margin-top: 12px;
+        }
+        .timer-bar-fill {
+            height: 100%; background: var(--primary); transition: width 0.3s; border-radius: 2px;
+        }
+
+        .frq-nav-block {
+            background: var(--paper);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            flex: 1;
+        }
+        .frq-nav-title {
+            font-family: var(--font-serif); font-size: 0.9rem; font-weight: 500;
+            color: var(--ink); margin-bottom: 14px;
+        }
+        .frq-nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .frq-nav-cell {
+            width: 100%; aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.82rem; cursor: pointer;
+            border: 2px solid var(--paper-shadow);
+            background: transparent; color: var(--ink-light);
+            transition: all 0.15s; font-family: var(--font-sans);
+        }
+        .frq-nav-cell.current {
+            border-color: var(--primary); color: var(--primary); font-weight: 600;
+            background: var(--primary-bg);
+        }
+        .frq-nav-cell:hover:not(.current) {
+            border-color: var(--primary-light); background: var(--primary-bg);
+        }
+
+        .action-buttons {
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .btn {
+            width: 100%; padding: 12px 14px; border: none; border-radius: 18px;
+            font-size: 0.85rem; cursor: pointer; font-weight: 500; font-family: var(--font-sans);
+            transition: all 0.15s; text-align: center;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--primary-light); color: var(--primary); }
+        .btn-outline:hover { background: var(--primary-bg); }
+        .btn-ghost { background: transparent; border: 1px solid transparent; color: var(--ink-light); }
+        .btn-ghost:hover { color: var(--ink-med); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Lightbox */
+        .lightbox {
+            display: none; position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; padding: 20px;
+            cursor: zoom-out;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img {
+            max-width: 95vw; max-height: 92vh; object-fit: contain;
+            border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+        .lightbox-hint {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            color: rgba(255,255,255,0.6); font-size: 0.8rem; pointer-events: none;
+        }
+
+        /* Confirm modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 900;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(3px);
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--paper); border: 1px solid var(--paper-shadow);
+            border-radius: 16px; padding: 36px 32px; max-width: 380px; width: 90%;
+            text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+        }
+        .modal-box .modal-icon { font-size: 2.4rem; margin-bottom: 12px; }
+        .modal-box h3 { font-family: var(--font-serif); font-size: 1.3rem; font-weight: 500; margin-bottom: 8px; }
+        .modal-box p { color: var(--ink-med); font-size: 0.85rem; line-height: 1.6; margin-bottom: 24px; }
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-actions .btn { flex: 1; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .frq-layout {
+                grid-template-columns: 1fr;
+            }
+            .frq-question { max-height: none; }
+            .frq-sidebar {
+                position: fixed; bottom: 0; left: 0; right: 0;
+                z-index: 100; flex-direction: row;
+                background: var(--paper);
+                padding: 12px 20px;
+                box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+                border-radius: 16px 16px 0 0;
+                align-items: center; gap: 12px;
+            }
+            .timer-block { box-shadow: none; padding: 0; flex-shrink: 0; }
+            .timer-display { font-size: 1.3rem; }
+            .timer-bar { display: none; }
+            .frq-nav-block { display: none; }
+            .action-buttons { flex-direction: row; }
+            .action-buttons .btn { flex: 1; }
+            .frq-wrapper { padding-bottom: 80px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="frq-wrapper">
+        <div class="frq-topbar">
+            <a class="back-btn" href="index.html" data-i18n="nav_home">← 首页</a>
+            <span style="color: var(--primary-dark); font-family: var(--font-serif); font-size: 0.9rem;">AP Physics 1 · FRQ 2024</span>
+            <span></span>
+        </div>
+
+        <div class="frq-layout">
+            <!-- Question panel -->
+            <div class="frq-question" id="questionPanel">
+                <div id="questionContent">
+                    <div class="loading-msg">
+                        <div class="spinner">⏳</div>
+                        <div data-i18n="data_loading">数据加载中...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="frq-sidebar">
+                <div class="timer-block">
+                    <div class="timer-row">
+                        <div class="timer-display" id="timerDisplay">90:00</div>
+                    </div>
+                    <div class="timer-bar"><div class="timer-bar-fill" id="timerBarFill" style="width:0%"></div></div>
+                </div>
+
+                <div class="frq-nav-block">
+                    <div class="frq-nav-title" data-i18n="nav_title">题目导航</div>
+                    <div class="frq-nav-grid" id="frqNavGrid"></div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="revealBtn" onclick="toggleAnswer()" data-i18n="btn_reveal">查看答案</button>
+                    <button class="btn btn-ghost" id="prevBtn" onclick="prevQuestion()" data-i18n="btn_prev">← 上一题</button>
+                    <button class="btn btn-ghost" id="nextBtn" onclick="nextQuestion()" data-i18n="btn_next">下一题 →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <img id="lightboxImg" src="" alt="">
+        <div class="lightbox-hint" data-i18n="lightbox_hint">点击任意位置关闭</div>
+    </div>
+
+    <!-- Confirm modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box">
+            <div class="modal-icon">📝</div>
+            <h3 data-i18n="confirm_title">确认提交</h3>
+            <p data-i18n="confirm_desc">FRQ 为练习模式，提交后将显示答案。</p>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeConfirmModal()" data-i18n="btn_cancel">取消</button>
+                <button class="btn btn-primary" onclick="submitFRQ()" data-i18n="btn_confirm">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    window.I18N = {
+        zh: {
+            nav_home: '← 首页',
+            nav_title: '题目导航',
+            btn_prev: '← 上一题',
+            btn_next: '下一题 →',
+            btn_reveal: '查看答案',
+            btn_cancel: '取消',
+            btn_confirm: '确认',
+            confirm_title: '确认',
+            confirm_desc: 'FRQ 为练习模式，完成后可查看参考答案。',
+            lightbox_hint: '点击任意位置关闭',
+            q_of: '第 %d 题',
+            data_loading: '数据加载中...',
+            practice_placeholder: '在此输入你的作答...\n\n练习模式：不判分，仅供对照参考答案。',
+            practice_mode: '练习模式 · 90分钟限时',
+        },
+        en: {
+            nav_home: '← Home',
+            nav_title: 'Question Nav',
+            btn_prev: '← Prev',
+            btn_next: 'Next →',
+            btn_reveal: 'Show Answer',
+            btn_cancel: 'Cancel',
+            btn_confirm: 'Confirm',
+            confirm_title: 'Confirm',
+            confirm_desc: 'FRQ is practice mode. Answer will be shown after submit.',
+            lightbox_hint: 'Click anywhere to close',
+            q_of: 'Question %d',
+            data_loading: 'Loading data...',
+            practice_placeholder: 'Type your answer here...\n\nPractice mode: not graded, for reference only.',
+            practice_mode: 'Practice Mode · 90 min',
+        }
+    };
+    </script>
+    <script src="i18n.js"></script>
+
+    <script>
+    const TOTAL_FRQ = 5;
+    const FRQ_DURATION = 90 * 60 * 1000;
+    const STORAGE_KEY = 'ap_physics_frq_2024';
+
+    let examData = null;
+    let currentQ = 0;
+    let practiceAnswers = new Array(TOTAL_FRQ).fill('');
+    let timerInterval = null;
+    let timeLeft = FRQ_DURATION;
+    let answerRevealed = false;
+
+    async function loadExamData() {
+        try {
+            const r = await fetch('/data/frq.json');
+            if (!r.ok) throw new Error('not found');
+            examData = await r.json();
+            initFRQ();
+        } catch (e) {
+            showNoData();
+        }
+    }
+
+    function showNoData() {
+        document.getElementById('questionContent').innerHTML = `
+            <div class="loading-msg">
+                <div class="spinner">⏳</div>
+                <div data-i18n="data_loading">数据加载中...</div>
+            </div>`;
+    }
+
+    function initFRQ() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.practiceAnswers) practiceAnswers = data.practiceAnswers;
+                if (data.currentQ !== undefined) currentQ = data.currentQ;
+                if (data.timeLeft !== undefined) timeLeft = data.timeLeft;
+            } catch(e) {}
+        }
+
+        buildNav();
+        showQuestion(currentQ);
+        startTimer();
+        saveProgress();
+    }
+
+    function buildNav() {
+        const grid = document.getElementById('frqNavGrid');
+        grid.innerHTML = '';
+        for (let i = 0; i < TOTAL_FRQ; i++) {
+            const cell = document.createElement('button');
+            cell.className = 'frq-nav-cell' + (i === currentQ ? ' current' : '');
+            cell.textContent = i + 1;
+            cell.onclick = () => goToQuestion(i);
+            grid.appendChild(cell);
+        }
+    }
+
+    function showQuestion(idx) {
+        if (!examData) return;
+        currentQ = idx;
+        answerRevealed = false;
+
+        const qData = examData.questions && examData.questions[idx];
+        const qNum = idx + 1;
+
+        let html = `
+            <div class="q-meta">
+                <span>${I18n.t('q_of').replace('%d', qNum)}</span>
+                <span class="q-meta-line"></span>
+            </div>
+            <div class="q-number">FRQ ${qNum}</div>
+            <div class="q-title">${I18n.t('practice_mode')}</div>
+        `;
+
+        if (qData && qData.image) {
+            html += `<img class="frq-image" src="images/${qData.image}" alt="FRQ ${qNum}" onclick="openLightbox(this.src)">`;
+        }
+
+        html += `
+            <div class="practice-area">
+                <div class="practice-label" data-i18n="practice_title">你的作答</div>
+                <textarea class="practice-textarea" id="practiceInput"
+                    data-i18n-placeholder="practice_placeholder"
+                    placeholder="在此输入你的作答..."
+                    oninput="updatePractice(${idx}, this.value)">${practiceAnswers[idx] || ''}</textarea>
+                <div class="practice-hint" data-i18n="practice_hint">练习模式不判分，仅供对照参考答案</div>
+            </div>
+            <div class="answer-reveal" id="answerReveal">
+                <h4 data-i18n="answer_title">参考答案</h4>
+                <p>${qData && qData.answer ? qData.answer.replace(/\n/g, '<br>') : '暂无参考答案'}</p>
+            </div>
+        `;
+
+        document.getElementById('questionContent').innerHTML = html;
+
+        // Update nav
+        document.querySelectorAll('.frq-nav-cell').forEach((cell, i) => {
+            cell.classList.toggle('current', i === currentQ);
+        });
+
+        document.getElementById('prevBtn').disabled = currentQ === 0;
+        document.getElementById('revealBtn').textContent = I18n.t('btn_reveal');
+
+        saveProgress();
+    }
+
+    function updatePractice(idx, val) {
+        practiceAnswers[idx] = val;
+        saveProgress();
+    }
+
+    function prevQuestion() {
+        if (currentQ > 0) showQuestion(currentQ - 1);
+    }
+
+    function nextQuestion() {
+        if (currentQ < TOTAL_FRQ - 1) showQuestion(currentQ + 1);
+    }
+
+    function goToQuestion(idx) {
+        showQuestion(idx);
+    }
+
+    function toggleAnswer() {
+        answerRevealed = !answerRevealed;
+        document.getElementById('answerReveal').classList.toggle('show', answerRevealed);
+        document.getElementById('revealBtn').textContent = answerRevealed ? '隐藏答案' : I18n.t('btn_reveal');
+    }
+
+    // Timer
+    function startTimer() {
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            timeLeft -= 1000;
+            if (timeLeft <= 0) {
+                timeLeft = 0;
+                clearInterval(timerInterval);
+            }
+            updateTimerDisplay();
+            saveProgress();
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const ms = Math.max(0, timeLeft);
+        const mins = Math.floor(ms / 60000);
+        const secs = Math.floor((ms % 60000) / 1000);
+        document.getElementById('timerDisplay').textContent =
+            String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+        const pct = Math.round((1 - ms / FRQ_DURATION) * 100);
+        document.getElementById('timerBarFill').style.width = pct + '%';
+    }
+
+    function saveProgress() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            practiceAnswers, currentQ, timeLeft
+        }));
+    }
+
+    // Lightbox
+    function openLightbox(src) {
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('lightbox').classList.add('open');
+    }
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('open');
+    }
+
+    I18n.onSwitch(() => {
+        if (examData) showQuestion(currentQ);
+    });
+
+    loadExamData();
+    </script>
+</body>
+</html>

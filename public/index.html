@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics 1 · 在线练习</title>
+    <script src="auth-guard.js"></script>
+    <script src="analytics.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #4A90D9;
+            --primary-dark: #2C5282;
+            --primary-light: #E8F0F8;
+            --primary-bg: #F0F6FC;
+            --bg: #F5F7FA;
+            --paper: #FFFFFF;
+            --ink: #1A202C;
+            --ink-light: #718096;
+            --ink-faint: rgba(26,32,44,0.08);
+            --warm: #E2E8F0;
+            --accent: #2C5282;
+        }
+
+        body {
+            font-family: 'Noto Serif SC', 'Georgia', serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--ink);
+        }
+
+        .page {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        .site-header {
+            text-align: center;
+            margin-bottom: 48px;
+            position: relative;
+        }
+        .i18n-toggle {
+            position: absolute; top: 8px; right: 0;
+            padding: 4px 14px; border-radius: 999px;
+            border: 1px solid var(--warm); background: white;
+            color: var(--ink); font-size: 0.82rem; font-family: inherit;
+            cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
+        }
+        .i18n-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+        .site-header h1 {
+            font-family: 'Playfair Display', 'Noto Serif SC', serif;
+            font-size: 2.6rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            color: var(--primary-dark);
+        }
+
+        .site-header .tagline {
+            color: var(--ink-light);
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .level-info {
+            text-align: center; margin-bottom: 48px; color: var(--ink-light); font-size: 0.9rem;
+        }
+        .level-info .grade {
+            display: inline-block; background: var(--primary-bg); color: var(--primary);
+            padding: 4px 16px; border-radius: 12px; font-size: 0.8rem; margin-top: 6px;
+        }
+
+        /* Entry cards */
+        .entry-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 28px; max-width: 800px; margin: 0 auto;
+        }
+
+        .entry-card {
+            background: white; border: 1px solid var(--warm); border-radius: 16px;
+            padding: 44px 28px; text-decoration: none; color: var(--ink);
+            display: flex; flex-direction: column; align-items: center; gap: 16px;
+            transition: all 0.25s; position: relative; overflow: hidden;
+        }
+        .entry-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: var(--primary-light); transition: background 0.25s;
+        }
+        .entry-card:hover { border-color: var(--primary); box-shadow: 0 8px 30px rgba(74,144,217,0.1); transform: translateY(-2px); }
+        .entry-card:hover::before { background: var(--primary); }
+
+        .entry-icon { font-size: 2.2rem; }
+        .entry-title { font-family: 'Playfair Display', 'Noto Serif SC', serif; font-size: 1.3rem; font-weight: 600; }
+        .entry-desc { color: var(--ink-light); font-size: 0.85rem; line-height: 1.7; text-align: center; }
+        .entry-action { font-size: 0.8rem; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+
+        .login-link { text-align: center; margin-top: 48px; }
+        .login-link a {
+            color: var(--ink-light); text-decoration: none; font-size: 0.85rem;
+            padding: 8px 20px; border: 1px solid var(--warm); border-radius: 20px; transition: all 0.2s;
+        }
+        .login-link a:hover { color: var(--primary); border-color: var(--primary); }
+
+        .site-footer { text-align: center; margin-top: 60px; color: var(--ink-light); font-size: 0.8rem; opacity: 0.7; }
+
+        /* Bottom action row */
+        .bottom-actions {
+            display: flex; justify-content: center; gap: 32px;
+            margin-top: 48px; flex-wrap: wrap;
+        }
+        .bottom-action {
+            display: flex; align-items: center; gap: 8px;
+            color: var(--ink-light); font-size: 0.88rem; cursor: pointer;
+            padding: 10px 22px; border: 1px solid var(--warm); border-radius: 20px;
+            background: none; font-family: inherit; transition: all 0.2s;
+            text-decoration: none;
+        }
+        .bottom-action:hover { color: var(--primary); border-color: var(--primary); background: var(--primary-bg); }
+        .bottom-action .act-icon { font-size: 1.1rem; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(26,32,44,0.5); z-index: 100; align-items: center; justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: white; border-radius: 20px; padding: 36px 32px;
+            max-width: 480px; width: 90%; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(26,32,44,0.2); position: relative;
+        }
+        .modal-close {
+            position: absolute; top: 14px; right: 18px; background: none; border: none;
+            font-size: 1.4rem; color: var(--ink-light); cursor: pointer; line-height: 1;
+        }
+        .modal-close:hover { color: var(--ink); }
+        .modal h2 {
+            font-family: 'Playfair Display', 'Noto Serif SC', serif;
+            font-size: 1.4rem; margin-bottom: 20px; text-align: center;
+        }
+
+        /* Feedback form */
+        .fb-types { display: flex; gap: 8px; margin-bottom: 16px; justify-content: center; }
+        .fb-type {
+            padding: 6px 16px; border: 1px solid var(--warm); border-radius: 14px;
+            font-size: 0.82rem; cursor: pointer; background: none; font-family: inherit;
+            color: var(--ink-light); transition: all 0.15s;
+        }
+        .fb-type.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .fb-textarea {
+            width: 100%; min-height: 120px; border: 1px solid var(--warm); border-radius: 12px;
+            padding: 14px; font-family: inherit; font-size: 0.9rem; resize: vertical;
+            background: var(--bg); color: var(--ink); outline: none;
+        }
+        .fb-textarea:focus { border-color: var(--primary); }
+        .fb-submit {
+            display: block; width: 100%; margin-top: 14px; padding: 12px;
+            background: var(--primary); color: white; border: none; border-radius: 14px;
+            font-size: 0.95rem; cursor: pointer; font-family: inherit; transition: opacity 0.2s;
+        }
+        .fb-submit:hover { opacity: 0.9; }
+        .fb-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .fb-msg { text-align: center; margin-top: 12px; font-size: 0.85rem; }
+        .fb-msg.ok { color: #48bb78; }
+        .fb-msg.err { color: #f56565; }
+
+        /* Support ribbon */
+        .support-ribbon {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--primary-light);
+            border-radius: 18px;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 0 auto 28px;
+            max-width: 720px;
+            box-shadow: 0 2px 12px rgba(74,144,217,0.08);
+        }
+        .support-ribbon-copy {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+        .support-ribbon strong {
+            color: var(--primary);
+            font-family: 'Playfair Display', 'Noto Serif SC', serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+        .support-ribbon p {
+            color: var(--ink-light);
+            font-size: 0.82rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+        .support-ribbon button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--primary-light);
+            background: white;
+            color: var(--ink);
+            font: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .support-ribbon button:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: var(--primary-bg);
+        }
+        @media (max-width: 600px) {
+            .support-ribbon { border-radius: 14px; padding: 12px 16px; }
+            .support-ribbon-copy { align-items: flex-start; }
+            .support-ribbon button { width: 100%; justify-content: center; }
+        }
+
+        /* Donate modal */
+        .donate-intro { text-align: center; color: var(--ink-light); font-size: 0.88rem; line-height: 1.8; margin-bottom: 20px; }
+        .qr-tabs { display: flex; justify-content: center; gap: 0; margin-bottom: 16px; border-bottom: 1px solid var(--warm); }
+        .qr-tab {
+            padding: 8px 24px; font-size: 0.88rem; cursor: pointer; border-bottom: 2px solid transparent;
+            color: var(--ink-light); font-family: inherit; background: none; border-top: none; border-left: none; border-right: none;
+        }
+        .qr-tab.active { font-weight: 600; border-bottom-color: currentColor; }
+        .qr-tab.alipay.active { color: #1677ff; }
+        .qr-tab.wechat.active { color: #07c160; }
+        .qr-img { display: block; margin: 0 auto; max-width: 260px; border-radius: 12px; }
+        .donate-thanks {
+            text-align: center; margin-top: 16px; color: var(--ink-light); font-size: 0.82rem; line-height: 1.7;
+        }
+
+        @media (max-width: 600px) {
+            .site-header h1 { font-size: 2rem; }
+            .entry-grid { grid-template-columns: 1fr; max-width: 400px; }
+            .entry-card { padding: 36px 24px; }
+            .page { padding: 30px 16px 40px; }
+            .modal { padding: 28px 20px; }
+            .bottom-actions { gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="site-header">
+            <button class="i18n-toggle" onclick="I18n.toggle()">EN</button>
+            <h1>AP Physics 1</h1>
+            <p class="tagline" data-i18n="tagline">AP Physics 1 · 在线练习</p>
+        </div>
+
+        <section class="support-ribbon">
+            <div class="support-ribbon-copy">
+                <strong data-i18n="support_title">支持维护</strong>
+                <p data-i18n="support_desc">如果这个网站对你有帮助，欢迎请我喝杯咖啡。</p>
+            </div>
+            <button onclick="openDonate()" data-i18n="support_btn">☕ 请我喝杯咖啡</button>
+        </section>
+
+        <div class="level-info" id="levelInfo">
+            <div>AP Physics 1 · 2024 · 共 70 道选择题 + 5 道简答题</div>
+            <div class="grade">选择题 70分 · 简答题 90分钟</div>
+        </div>
+
+        <div class="entry-grid">
+            <a id="quizEntry" href="quiz.html" class="entry-card" onclick="window.APPhysicsAnalytics?.track('home_entry_click',{meta:{target:'quiz'}})">
+                <div class="entry-icon">✏️</div>
+                <div class="entry-title" data-i18n="entry_mcq">在线练习 (MCQ)</div>
+                <div class="entry-desc" data-i18n-html="entry_mcq_desc">选择题逐题作答<br>提交后自动判分</div>
+                <div class="entry-action">Start →</div>
+            </a>
+
+            <a href="frq.html" class="entry-card">
+                <div class="entry-icon">📝</div>
+                <div class="entry-title" data-i18n="entry_frq">自由问答 (FRQ)</div>
+                <div class="entry-desc" data-i18n-html="entry_frq_desc">简答题练习模式<br>90分钟限时作答</div>
+                <div class="entry-action">Start →</div>
+            </a>
+
+            <a href="papers.html" class="entry-card">
+                <div class="entry-icon">📄</div>
+                <div class="entry-title" data-i18n="entry_papers">历年真题 (PDF)</div>
+                <div class="entry-desc" data-i18n-html="entry_papers_desc">PDF 原卷查看与下载<br>含题目与官方解析</div>
+                <div class="entry-action">Browse →</div>
+            </a>
+        </div>
+
+        <div class="bottom-actions">
+            <button class="bottom-action" onclick="openFeedback()">
+                <span class="act-icon">💬</span> <span data-i18n="btn_feedback">意见反馈</span>
+            </button>
+            <button class="bottom-action" onclick="openDonate()">
+                <span class="act-icon">☕</span> <span data-i18n="support_btn_short">请我喝杯咖啡</span>
+            </button>
+        </div>
+
+        <div class="login-link" id="authArea">
+            <a href="login.html" data-i18n="auth_login">登录 / 注册</a>
+        </div>
+
+        <div class="site-footer">
+            AP Physics 1 Practice System
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeFeedback()">&times;</button>
+            <h2 data-i18n="fb_title">意见反馈</h2>
+            <div class="fb-types">
+                <button class="fb-type active" data-type="suggestion" data-i18n="fb_suggestion">建议</button>
+                <button class="fb-type" data-type="praise" data-i18n="fb_praise">表扬</button>
+                <button class="fb-type" data-type="bug" data-i18n="fb_bug">问题报错</button>
+            </div>
+            <textarea class="fb-textarea" id="fbContent" data-i18n-placeholder="fb_placeholder" placeholder="请输入你的反馈内容..."></textarea>
+            <button class="fb-submit" id="fbSubmit" onclick="submitFeedback()" data-i18n="fb_submit">提交反馈</button>
+            <div class="fb-msg" id="fbMsg"></div>
+        </div>
+    </div>
+
+    <!-- Donate Modal -->
+    <div class="modal-overlay" id="donateModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeDonate()">&times;</button>
+            <h2 data-i18n="donate_title">支持我们</h2>
+            <div class="donate-intro" data-i18n-html="donate_intro">
+                这个网站由一位老师利用业余时间开发维护<br>
+                如果对你有帮助，欢迎请我喝杯咖啡 :)
+            </div>
+            <div class="qr-tabs">
+                <button class="qr-tab alipay active" onclick="switchQR('alipay')" data-i18n="donate_alipay">支付宝</button>
+                <button class="qr-tab wechat" onclick="switchQR('wechat')" data-i18n="donate_wechat">微信</button>
+            </div>
+            <img class="qr-img" id="qrImg" src="images/alipay-qr.png" alt="收款码">
+            <div class="donate-thanks" data-i18n-html="donate_thanks">
+                感谢你的支持与鼓励<br>每一份心意都是继续更新的动力
+            </div>
+        </div>
+    </div>
+
+    <!-- User status -->
+    <script>
+        function renderAuthArea() {
+            const user = JSON.parse(localStorage.getItem('physics_user') || 'null');
+            const area = document.getElementById('authArea');
+            if (user) {
+                area.innerHTML = `<span style="color:var(--ink-light);font-size:0.85rem;">${user.username}</span> ` +
+                    ` <a href="javascript:void(0)" onclick="localStorage.clear();location.reload()">${I18n.t('auth_logout')}</a>`;
+            } else {
+                area.innerHTML = `<a href="login.html">${I18n.t('auth_login')}</a>`;
+            }
+        }
+    </script>
+
+    <!-- Feedback & Donate -->
+    <script>
+        let fbType = 'suggestion';
+
+        document.querySelectorAll('.fb-type').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.fb-type').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                fbType = btn.dataset.type;
+            });
+        });
+
+        function openFeedback() {
+            if (!requireLogin(I18n.t('fb_login_required'))) return;
+            document.getElementById('fbContent').value = '';
+            document.getElementById('fbMsg').textContent = '';
+            document.getElementById('fbSubmit').disabled = false;
+            document.getElementById('feedbackModal').classList.add('show');
+        }
+        function closeFeedback() { document.getElementById('feedbackModal').classList.remove('show'); }
+
+        async function submitFeedback() {
+            const content = document.getElementById('fbContent').value.trim();
+            if (!content) { showFbMsg(I18n.t('fb_empty'), 'err'); return; }
+            const btn = document.getElementById('fbSubmit');
+            btn.disabled = true; btn.textContent = I18n.t('fb_submitting');
+            try {
+                const token = localStorage.getItem('physics_token');
+                const r = await fetch('/api/feedback/submit', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: fbType, content })
+                });
+                const data = await r.json();
+                if (data.ok) {
+                    showFbMsg(I18n.t('fb_thanks'), 'ok');
+                    document.getElementById('fbContent').value = '';
+                    setTimeout(closeFeedback, 1500);
+                } else {
+                    showFbMsg(data.error || I18n.t('fb_error'), 'err');
+                }
+            } catch { showFbMsg(I18n.t('fb_net_error'), 'err'); }
+            btn.disabled = false; btn.textContent = I18n.t('fb_submit');
+        }
+        function showFbMsg(msg, type) {
+            const el = document.getElementById('fbMsg');
+            el.textContent = msg; el.className = 'fb-msg ' + type;
+        }
+
+        function openDonate() { document.getElementById('donateModal').classList.add('show'); }
+        function closeDonate() { document.getElementById('donateModal').classList.remove('show'); }
+        function switchQR(type) {
+            document.querySelectorAll('.qr-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.qr-tab.' + type).classList.add('active');
+            document.getElementById('qrImg').src = 'images/' + type + '-qr.png';
+        }
+
+        // Close modals on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('show');
+            });
+        });
+    </script>
+
+    <!-- i18n dictionary -->
+    <script>
+    window.I18N = {
+        zh: {
+            tagline: 'AP Physics 1 · 在线练习',
+            support_title: '支持维护',
+            support_desc: '如果这个网站对你有帮助，欢迎请我喝杯咖啡。',
+            support_btn: '☕ 请我喝杯咖啡',
+            support_btn_short: '请我喝杯咖啡',
+            entry_mcq: '在线练习 (MCQ)',
+            entry_mcq_desc: '选择题逐题作答<br>提交后自动判分',
+            entry_frq: '自由问答 (FRQ)',
+            entry_frq_desc: '简答题练习模式<br>90分钟限时作答',
+            entry_papers: '历年真题 (PDF)',
+            entry_papers_desc: 'PDF 原卷查看与下载<br>含题目与官方解析',
+            btn_feedback: '意见反馈',
+            auth_login: '登录 / 注册',
+            auth_logout: '退出',
+            fb_title: '意见反馈',
+            fb_suggestion: '建议',
+            fb_praise: '表扬',
+            fb_bug: '问题报错',
+            fb_placeholder: '请输入你的反馈内容...',
+            fb_submit: '提交反馈',
+            fb_submitting: '提交中...',
+            fb_thanks: '感谢你的反馈！',
+            fb_error: '提交失败，请稍后重试',
+            fb_empty: '请输入内容',
+            fb_net_error: '网络错误，请稍后重试',
+            fb_login_required: '登录后可提交反馈。',
+            donate_title: '支持我们',
+            donate_intro: '这个网站由一位老师利用业余时间开发维护<br>如果对你有帮助，欢迎请我喝杯咖啡 :)',
+            donate_alipay: '支付宝',
+            donate_wechat: '微信',
+            donate_thanks: '感谢你的支持与鼓励<br>每一份心意都是继续更新的动力',
+        },
+        en: {
+            tagline: 'AP Physics 1 · Online Practice',
+            support_title: 'Support Us',
+            support_desc: 'If this site helps you, feel free to buy me a coffee.',
+            support_btn: '☕ Buy Me a Coffee',
+            support_btn_short: 'Buy Me a Coffee',
+            entry_mcq: 'Online Practice (MCQ)',
+            entry_mcq_desc: 'Multiple choice questions<br>Auto-graded on submit',
+            entry_frq: 'Free Response (FRQ)',
+            entry_frq_desc: 'FRQ practice mode<br>90-minute timed section',
+            entry_papers: 'Past Papers (PDF)',
+            entry_papers_desc: 'View & download original PDFs<br>Questions and official solutions',
+            btn_feedback: 'Feedback',
+            auth_login: 'Login / Register',
+            auth_logout: 'Logout',
+            fb_title: 'Feedback',
+            fb_suggestion: 'Suggestion',
+            fb_praise: 'Praise',
+            fb_bug: 'Bug Report',
+            fb_placeholder: 'Enter your feedback...',
+            fb_submit: 'Submit',
+            fb_submitting: 'Submitting...',
+            fb_thanks: 'Thanks for your feedback!',
+            fb_error: 'Submit failed, please try again later',
+            fb_empty: 'Please enter your feedback',
+            fb_net_error: 'Network error, please try again later',
+            fb_login_required: 'Please login to submit feedback.',
+            donate_title: 'Support Us',
+            donate_intro: 'This site is built and maintained by a teacher in spare time.<br>If it helps you, feel free to buy me a coffee :)',
+            donate_alipay: 'Alipay',
+            donate_wechat: 'WeChat Pay',
+            donate_thanks: 'Thank you for your support and encouragement.<br>Every bit of kindness keeps this project going.',
+        }
+    };
+    </script>
+    <script src="i18n.js"></script>
+    <script>
+        I18n.onSwitch(() => renderAuthArea());
+        setTimeout(() => renderAuthArea(), 0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics 1 · 在线练习</title>
+    <script src="auth-guard.js"></script>
+    <script src="analytics.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Raleway:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        :root {
+            --paper: #FDFBF9; --paper-shadow: #E2E8F0; --desk: #E8EEF4;
+            --ink: #1A202C; --ink-med: #4A5568; --ink-light: #A0AEC0; --ink-faint: rgba(26,32,44,0.08);
+            --primary: #4A90D9; --primary-dark: #2C5282; --primary-light: #BEE0F5;
+            --primary-bg: #EBF4FC; --primary-faint: rgba(74,144,217,0.15);
+            --ring: linear-gradient(90deg, #d5d1cc 0%, #fcfbfa 30%, #b8b3ae 80%, #9e9a95 100%);
+            --font-serif: 'Lora', 'Noto Serif SC', serif;
+            --font-sans: 'Raleway', 'Noto Serif SC', sans-serif;
+            --success: #48bb78; --success-bg: #f0fff4; --error: #f56565; --error-bg: #fff5f5;
+        }
+
+        body {
+            font-family: var(--font-sans); color: var(--ink);
+            background: var(--desk); background-image: radial-gradient(circle at 50% 0%, #F0F4F8, var(--desk));
+            min-height: 100vh;
+        }
+
+        /* ===== Quiz Layout ===== */
+        .quiz-wrapper {
+            min-height: 100vh;
+            padding: 24px; flex-direction: column; align-items: center;
+        }
+
+        /* Top bar */
+        .quiz-topbar {
+            width: 100%; max-width: 1200px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 4px; margin-bottom: 16px; font-size: 0.85rem; color: var(--ink-light);
+        }
+        .quiz-topbar .back-btn {
+            background: none; border: none; font-family: inherit; font-size: 0.85rem;
+            color: var(--primary); cursor: pointer; padding: 4px 0;
+            text-decoration: none;
+        }
+        .quiz-topbar .back-btn:hover { color: var(--primary-dark); }
+
+        /* 3-column grid */
+        .quiz-layout {
+            display: grid;
+            grid-template-columns: 1fr 340px 240px;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            min-height: calc(100vh - 100px);
+        }
+
+        .quiz-question {
+            background: var(--paper);
+            border-radius: 12px;
+            padding: 32px 36px 32px 48px;
+            position: relative;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            overflow-y: auto;
+            max-height: calc(100vh - 100px);
+        }
+
+        /* Notebook dots */
+        .notebook-dots {
+            position: absolute; left: 14px; top: 40px; bottom: 40px;
+            width: 12px; display: flex; flex-direction: column;
+            justify-content: space-evenly; pointer-events: none;
+        }
+        .notebook-dot {
+            width: 10px; height: 10px;
+            background: var(--desk); border-radius: 50%;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .quiz-answer {
+            background: var(--paper);
+            border-radius: 12px;
+            padding: 32px 28px;
+            display: flex; flex-direction: column;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            overflow-y: auto;
+            max-height: calc(100vh - 100px);
+        }
+
+        .quiz-sidebar {
+            display: flex; flex-direction: column; gap: 16px;
+        }
+
+        /* Timer block */
+        .timer-block {
+            background: var(--paper);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .timer-row {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .timer-display {
+            font-family: var(--font-sans);
+            font-size: 2rem; font-weight: 600;
+            color: var(--primary); letter-spacing: 2px;
+        }
+        .timer-progress-text {
+            font-size: 0.82rem; color: var(--ink-light);
+        }
+        .timer-bar {
+            height: 3px; background: var(--paper-shadow); border-radius: 2px; margin-top: 12px;
+        }
+        .timer-bar-fill {
+            height: 100%; background: var(--primary); transition: width 0.3s; border-radius: 2px;
+        }
+
+        /* Nav grid block */
+        .nav-grid-block {
+            background: var(--paper);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            flex: 1;
+        }
+        .nav-grid-title {
+            font-family: var(--font-serif);
+            font-size: 0.9rem; font-weight: 500;
+            color: var(--ink); margin-bottom: 14px;
+        }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+        .nav-cell {
+            width: 100%; aspect-ratio: 1;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.78rem; cursor: pointer;
+            border: 2px solid var(--paper-shadow);
+            background: transparent; color: var(--ink-light);
+            transition: all 0.15s; font-family: var(--font-sans);
+        }
+        .nav-cell.answered {
+            background: var(--primary); border-color: var(--primary); color: white;
+        }
+        .nav-cell.current {
+            border-color: var(--primary); color: var(--primary); font-weight: 600;
+            box-shadow: 0 0 0 3px var(--primary-faint);
+        }
+        .nav-cell.answered.current {
+            background: var(--primary); color: white;
+            box-shadow: 0 0 0 3px var(--primary-faint);
+        }
+        .nav-cell:hover:not(.current) {
+            border-color: var(--primary-light); background: var(--primary-bg);
+        }
+        .nav-legend {
+            display: flex; gap: 14px; margin-top: 14px;
+            font-size: 0.72rem; color: var(--ink-light); justify-content: center;
+        }
+        .nav-legend-item { display: flex; align-items: center; gap: 4px; }
+        .nav-legend-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+        }
+        .nav-legend-dot.answered { background: var(--primary); }
+        .nav-legend-dot.unanswered { border: 2px solid var(--paper-shadow); }
+        .nav-legend-dot.current { border: 2px solid var(--primary); box-shadow: 0 0 0 2px var(--primary-faint); }
+
+        /* Sidebar submit */
+        .sidebar-submit {
+            padding: 14px;
+            background: var(--ink);
+            color: white;
+            border: none; border-radius: 12px;
+            font-size: 0.95rem; font-weight: 500;
+            cursor: pointer; font-family: var(--font-sans);
+            transition: opacity 0.15s;
+        }
+        .sidebar-submit:hover { opacity: 0.85; }
+
+        /* Left page content */
+        .q-meta {
+            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+        }
+        .q-meta-line { height: 1px; flex: 1; background: var(--primary-faint); }
+
+        .q-number {
+            font-family: var(--font-serif); font-size: 2.2rem; font-weight: 400;
+            color: var(--ink); line-height: 1.1; margin-bottom: 4px;
+        }
+        .q-sub { font-family: var(--font-serif); font-size: 1rem; color: var(--ink-med); font-style: italic; margin-bottom: 20px; }
+
+        /* Question image */
+        .question-image {
+            width: 100%; max-width: 100%; border-radius: 6px; border: 1px solid var(--paper-shadow);
+            background: white; cursor: zoom-in;
+            min-height: 200px; object-fit: contain;
+            -webkit-user-select: none; user-select: none; -webkit-user-drag: none;
+        }
+        .question-image.loading {
+            background: linear-gradient(90deg, #f0ece8 25%, #e8e4df 50%, #f0ece8 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+
+        /* Loading / no data */
+        .loading-msg {
+            text-align: center; padding: 60px 20px; color: var(--ink-light);
+            font-family: var(--font-serif); font-size: 1.1rem;
+        }
+        .loading-msg .spinner {
+            font-size: 2rem; margin-bottom: 12px; animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* Lightbox overlay */
+        .lightbox {
+            display: none; position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; padding: 20px;
+            cursor: zoom-out;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img {
+            max-width: 95vw; max-height: 92vh; object-fit: contain;
+            border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            transform: scale(0.95); transition: transform 0.25s ease;
+        }
+        .lightbox.open img { transform: scale(1); }
+        .lightbox-hint {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            color: rgba(255,255,255,0.6); font-size: 0.8rem; pointer-events: none;
+        }
+
+        /* Right page content */
+        .section-title {
+            font-family: var(--font-serif); font-size: 1.3rem; color: var(--ink);
+            margin-bottom: 20px; position: relative; display: inline-block;
+        }
+        .section-title::after {
+            content: ''; position: absolute; bottom: 4px; left: 0; width: 100%;
+            height: 8px; background: var(--primary-faint); z-index: -1;
+        }
+
+        .options { display: grid; gap: 10px; flex: 0; }
+        .option {
+            display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+            border: 1.5px solid var(--ink-faint); border-radius: 10px;
+            cursor: pointer; transition: all 0.15s; user-select: none;
+        }
+        .option:hover:not(.disabled) { border-color: var(--primary-light); background: var(--primary-bg); }
+        .option.selected { background: var(--primary-bg); border-color: var(--primary); }
+        .option.correct { background: var(--success-bg); border-color: var(--success); }
+        .option.wrong { background: var(--error-bg); border-color: var(--error); }
+        .option.disabled { cursor: default; opacity: 0.6; }
+
+        .opt-check {
+            width: 20px; height: 20px; border: 1.5px solid var(--ink-light); border-radius: 50%;
+            flex-shrink: 0; transition: all 0.2s; position: relative;
+        }
+        .opt-check:hover { border-color: var(--primary); }
+        .option.selected .opt-check { background: var(--primary); border-color: var(--primary); }
+        .option.selected .opt-check::after {
+            content: ''; position: absolute; top: 4px; left: 6px; width: 4px; height: 8px;
+            border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
+        }
+        .option.correct .opt-check { background: var(--success); border-color: var(--success); }
+        .option.correct .opt-check::after {
+            content: ''; position: absolute; top: 4px; left: 6px; width: 4px; height: 8px;
+            border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
+        }
+        .option.wrong .opt-check { background: var(--error); border-color: var(--error); }
+        .option.wrong .opt-check::after {
+            content: '\2715'; color: white; font-size: 10px; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%,-50%);
+        }
+
+        .opt-label { font-size: 0.95rem; color: var(--ink); }
+        .option.disabled.correct .opt-label { color: var(--success); }
+        .option.disabled.wrong .opt-label { text-decoration: line-through; text-decoration-color: var(--primary-light); color: var(--ink-light); }
+
+        .feedback {
+            margin-top: 16px; padding: 10px 14px; border-radius: 6px; display: none;
+            font-size: 0.85rem; font-family: var(--font-serif); font-style: italic;
+        }
+        .feedback.show { display: block; }
+        .feedback.correct { background: var(--success-bg); color: #276749; }
+        .feedback.wrong { background: var(--error-bg); color: #c53030; }
+
+        .right-spacer { flex: 1; }
+
+        /* Action buttons */
+        .action-bar {
+            display: flex; gap: 10px; padding-top: 16px;
+            border-top: 1px solid var(--ink-faint);
+            position: sticky; bottom: 0;
+            background: var(--paper);
+            margin-top: auto;
+            z-index: 2;
+        }
+        .btn {
+            flex: 1; padding: 10px 14px; border: none; border-radius: 18px;
+            font-size: 0.85rem; cursor: pointer; font-weight: 500; font-family: var(--font-sans); transition: all 0.15s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--primary-light); color: var(--primary); }
+        .btn-outline:hover { background: var(--primary-bg); }
+        .btn-ghost { background: transparent; border: 1px solid transparent; color: var(--ink-light); }
+        .btn-ghost:hover { color: var(--ink-med); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Explanation panel */
+        .explanation-panel {
+            margin-top: 12px; padding: 14px 16px; border-radius: 10px;
+            background: linear-gradient(135deg, #f8f6f3, #f0ece8); border: 1px solid var(--paper-shadow);
+            font-size: 0.82rem; color: var(--ink-med); line-height: 1.7; display: none;
+        }
+        .explanation-panel.show { display: block; }
+        .explanation-panel .exp-title {
+            font-family: var(--font-serif); font-size: 0.9rem; font-weight: 600;
+            color: var(--ink); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+        }
+        .explanation-panel .exp-tag {
+            font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;
+            background: var(--primary-faint); color: var(--primary); font-weight: 500;
+        }
+        .explanation-panel .exp-steps {
+            margin: 8px 0 0; padding-left: 18px;
+        }
+        .explanation-panel .exp-steps li { margin-bottom: 4px; }
+        .explanation-panel .exp-note {
+            margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--ink-faint);
+            font-style: italic; color: var(--ink-light); font-size: 0.78rem;
+        }
+
+        /* ===== Results ===== */
+        .results-page { display: none; max-width: 480px; margin: 80px auto; padding: 20px; }
+        .results-card {
+            background: var(--paper); border: 1px solid var(--paper-shadow); border-radius: 16px;
+            padding: 48px 36px; text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+        .results-card h2 { font-family: var(--font-serif); font-size: 1.6rem; font-weight: 400; margin-bottom: 8px; }
+
+        /* Score ring */
+        .score-ring-wrap {
+            position: relative; width: 160px; height: 160px; margin: 20px auto;
+        }
+        .score-ring-wrap svg { transform: rotate(-90deg); }
+        .score-ring-bg {
+            fill: none; stroke: var(--paper-shadow); stroke-width: 10;
+        }
+        .score-ring-fill {
+            fill: none; stroke: var(--primary); stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .score-ring-text {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .score-ring-number {
+            font-family: var(--font-serif); font-size: 2.4rem; font-weight: 500; color: var(--primary); line-height: 1;
+        }
+        .score-ring-label {
+            font-size: 0.78rem; color: var(--ink-light); margin-top: 4px;
+        }
+
+        .results-detail { color: var(--ink-light); margin-bottom: 16px; font-size: 0.9rem; line-height: 1.8; }
+        .results-breakdown {
+            text-align: left; background: var(--primary-bg); border-radius: 10px;
+            padding: 14px 18px; margin-bottom: 20px; font-size: 0.82rem; color: var(--ink-med); line-height: 1.8;
+        }
+        .results-breakdown .label { display: inline-block; min-width: 100px; }
+
+        /* AP Score */
+        .ap-score-badge {
+            display: inline-block; padding: 10px 32px; border-radius: 12px;
+            font-size: 1.4rem; font-weight: 700; margin-bottom: 20px;
+        }
+        .ap-5 { background: #c6f6d5; color: #276749; }
+        .ap-4 { background: #c6e3f4; color: #2b6cb0; }
+        .ap-3 { background: #fefcbf; color: #975a16; }
+        .ap-2 { background: #fed7aa; color: #9c4221; }
+        .ap-1 { background: #fed7d7; color: #9b2c2c; }
+
+        .results-actions { display: flex; gap: 12px; justify-content: center; }
+
+        .loading { text-align: center; padding: 40px; color: var(--ink-light); }
+
+        /* Confirm modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 900;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(3px);
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--paper); border: 1px solid var(--paper-shadow);
+            border-radius: 16px; padding: 36px 32px; max-width: 380px; width: 90%;
+            text-align: center;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+        }
+        .modal-box .modal-icon { font-size: 2.4rem; margin-bottom: 12px; }
+        .modal-box h3 {
+            font-family: var(--font-serif); font-size: 1.3rem; font-weight: 500; margin-bottom: 8px;
+        }
+        .modal-box p { color: var(--ink-med); font-size: 0.85rem; line-height: 1.6; margin-bottom: 24px; }
+        .modal-box .modal-info {
+            background: var(--primary-bg); border-radius: 8px; padding: 10px 14px;
+            font-size: 0.8rem; color: var(--ink-med); margin-bottom: 20px;
+        }
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-actions .btn { flex: 1; }
+
+        /* Question transition */
+        .quiz-question.fade-out, .quiz-answer.fade-out {
+            opacity: 0; transform: translateY(6px);
+        }
+        .quiz-question, .quiz-answer {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .quiz-layout {
+                grid-template-columns: 1fr 220px;
+            }
+            .quiz-question { grid-column: 1; grid-row: 1; max-height: 50vh; }
+            .quiz-answer { grid-column: 1; grid-row: 2; max-height: none; }
+            .quiz-sidebar { grid-column: 2; grid-row: 1 / 3; }
+            .nav-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .quiz-layout {
+                grid-template-columns: 1fr;
+                padding-bottom: 72px;
+            }
+            .quiz-question { max-height: none; }
+            .quiz-sidebar {
+                position: fixed; bottom: 0; left: 0; right: 0;
+                z-index: 100; flex-direction: row;
+                background: var(--paper);
+                padding: 12px 20px;
+                box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+                border-radius: 16px 16px 0 0;
+                align-items: center; gap: 12px;
+            }
+            .timer-block {
+                box-shadow: none; padding: 0; flex-shrink: 0;
+            }
+            .timer-display { font-size: 1.3rem; }
+            .timer-bar { display: none; }
+            .timer-progress-text { font-size: 0.75rem; }
+            .nav-grid-block {
+                display: none;
+                position: fixed; bottom: 60px; left: 0; right: 0;
+                max-height: 50vh; overflow-y: auto;
+                border-radius: 16px 16px 0 0; z-index: 99;
+                box-shadow: 0 -8px 24px rgba(0,0,0,0.1);
+            }
+            .nav-grid-block.mobile-open { display: block; }
+            .nav-grid { grid-template-columns: repeat(6, 1fr); }
+            .mobile-nav-toggle {
+                display: flex; align-items: center; justify-content: center;
+                width: 40px; height: 40px;
+                background: var(--primary-bg); border: 1px solid var(--paper-shadow);
+                border-radius: 10px; cursor: pointer; font-size: 1.1rem;
+                flex-shrink: 0;
+            }
+            .sidebar-submit {
+                padding: 10px 18px; font-size: 0.85rem; flex-shrink: 0;
+            }
+            .notebook-dots { display: none; }
+            .quiz-question { padding: 24px 20px; }
+            .quiz-answer { padding: 24px 20px; }
+        }
+        @media (max-width: 600px) {
+            .quiz-wrapper { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-wrapper" id="quizWrapper">
+        <!-- Top bar -->
+        <div class="quiz-topbar">
+            <a class="back-btn" href="index.html" data-i18n="nav_home">← 首页</a>
+            <span style="color: var(--primary-dark); font-family: var(--font-serif); font-size: 0.9rem;">AP Physics 1 · 2024</span>
+            <span></span>
+        </div>
+
+        <!-- 3-column layout -->
+        <div class="quiz-layout">
+            <!-- Question panel -->
+            <div class="quiz-question" id="questionPanel">
+                <div class="notebook-dots" id="notebookDots"></div>
+                <div id="questionContent">
+                    <!-- Dynamically loaded -->
+                </div>
+            </div>
+
+            <!-- Answer panel -->
+            <div class="quiz-answer" id="answerPanel">
+                <div class="section-title" data-i18n="choose_answer">选择答案</div>
+                <div class="options" id="optionsContainer">
+                    <!-- Dynamically loaded -->
+                </div>
+                <div class="feedback" id="feedbackBox"></div>
+                <div class="explanation-panel" id="explanationBox"></div>
+                <div class="right-spacer"></div>
+                <div class="action-bar" id="actionBar">
+                    <button class="btn btn-ghost" id="prevBtn" onclick="prevQuestion()" data-i18n="btn_prev">← 上一题</button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" data-i18n="btn_next">下一题 →</button>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="quiz-sidebar">
+                <div class="timer-block">
+                    <div class="timer-row">
+                        <div class="timer-display" id="timerDisplay">70:00</div>
+                        <div class="timer-progress-text" id="timerProgress">0%</div>
+                    </div>
+                    <div class="timer-bar"><div class="timer-bar-fill" id="timerBarFill" style="width:0%"></div></div>
+                </div>
+
+                <div class="nav-grid-block" id="navGridBlock">
+                    <div class="nav-grid-title" data-i18n="nav_title">题目导航</div>
+                    <div class="nav-grid" id="navGrid"></div>
+                    <div class="nav-legend">
+                        <div class="nav-legend-item"><div class="nav-legend-dot answered"></div><span data-i18n="legend_answered">已答</span></div>
+                        <div class="nav-legend-item"><div class="nav-legend-dot unanswered"></div><span data-i18n="legend_unanswered">未答</span></div>
+                        <div class="nav-legend-item"><div class="nav-legend-dot current"></div><span data-i18n="legend_current">当前</span></div>
+                    </div>
+                </div>
+
+                <button class="sidebar-submit" id="submitBtn" onclick="showSubmitModal()" data-i18n="btn_submit">提交试卷</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results page -->
+    <div class="results-page" id="resultsPage">
+        <div class="results-card">
+            <h2 data-i18n="results_title">练习完成</h2>
+            <div class="score-ring-wrap">
+                <svg width="160" height="160">
+                    <circle class="score-ring-bg" cx="80" cy="80" r="70"></circle>
+                    <circle class="score-ring-fill" id="scoreRingFill" cx="80" cy="80" r="70"
+                        stroke-dasharray="439.8" stroke-dashoffset="439.8"></circle>
+                </svg>
+                <div class="score-ring-text">
+                    <div class="score-ring-number" id="scoreNumber">0/75</div>
+                    <div class="score-ring-label" id="scoreLabel">选择题得分</div>
+                </div>
+            </div>
+            <div id="apScoreBadge" class="ap-score-badge ap-3"></div>
+            <div class="results-breakdown" id="resultsBreakdown"></div>
+            <div class="results-actions">
+                <button class="btn btn-outline" onclick="reviewWrong()" data-i18n="btn_review_wrong">查看错题</button>
+                <button class="btn btn-primary" onclick="location.href='index.html'" data-i18n="btn_back_home">返回首页</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <img id="lightboxImg" src="" alt="">
+        <div class="lightbox-hint" data-i18n="lightbox_hint">点击任意位置关闭</div>
+    </div>
+
+    <!-- Confirm modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box">
+            <div class="modal-icon">📋</div>
+            <h3 data-i18n="confirm_title">确认提交</h3>
+            <p data-i18n="confirm_desc">提交后将无法修改答案，确定要提交吗？</p>
+            <div class="modal-info" id="confirmInfo"></div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeConfirmModal()" data-i18n="btn_cancel">取消</button>
+                <button class="btn btn-primary" onclick="submitQuiz()" data-i18n="btn_confirm_submit">确认提交</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wrong review modal -->
+    <div class="modal-overlay" id="wrongModal">
+        <div class="modal-box" style="max-width:600px;max-height:85vh;overflow-y:auto;">
+            <h3 data-i18n="wrong_title">错题回顾</h3>
+            <div id="wrongList"></div>
+            <div class="modal-actions" style="margin-top:16px;">
+                <button class="btn btn-primary" onclick="closeWrongModal()" data-i18n="btn_close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    window.I18N = {
+        zh: {
+            nav_home: '← 首页',
+            choose_answer: '选择答案',
+            nav_title: '题目导航',
+            legend_answered: '已答',
+            legend_unanswered: '未答',
+            legend_current: '当前',
+            btn_prev: '← 上一题',
+            btn_next: '下一题 →',
+            btn_submit: '提交试卷',
+            btn_cancel: '取消',
+            btn_confirm_submit: '确认提交',
+            btn_back_home: '返回首页',
+            btn_review_wrong: '查看错题',
+            btn_close: '关闭',
+            results_title: '练习完成',
+            confirm_title: '确认提交',
+            confirm_desc: '提交后将无法修改答案，确定要提交吗？',
+            lightbox_hint: '点击任意位置关闭',
+            wrong_title: '错题回顾',
+            q_of: '第 %d 题',
+            score_label: '选择题得分',
+            unanswered: '未答',
+            unanswered_count: '未答 %d 题',
+            ap_score: 'AP 成绩',
+            load_error: '数据加载失败，请刷新重试',
+            data_loading: '数据加载中...',
+        },
+        en: {
+            nav_home: '← Home',
+            choose_answer: 'Choose Answer',
+            nav_title: 'Question Nav',
+            legend_answered: 'Answered',
+            legend_unanswered: 'Unanswered',
+            legend_current: 'Current',
+            btn_prev: '← Prev',
+            btn_next: 'Next →',
+            btn_submit: 'Submit Quiz',
+            btn_cancel: 'Cancel',
+            btn_confirm_submit: 'Confirm Submit',
+            btn_back_home: 'Back to Home',
+            btn_review_wrong: 'Review Wrong',
+            btn_close: 'Close',
+            results_title: 'Practice Complete',
+            confirm_title: 'Confirm Submit',
+            confirm_desc: 'Once submitted, answers cannot be changed. Continue?',
+            lightbox_hint: 'Click anywhere to close',
+            wrong_title: 'Wrong Questions Review',
+            q_of: 'Question %d',
+            score_label: 'MCQ Score',
+            unanswered: 'Unanswered',
+            unanswered_count: '%d unanswered',
+            ap_score: 'AP Score',
+            load_error: 'Failed to load data, please refresh.',
+            data_loading: 'Loading data...',
+        }
+    };
+    </script>
+    <script src="i18n.js"></script>
+
+    <script>
+    // ===== Quiz State =====
+    const TOTAL_Q = 70;
+    const QUIZ_DURATION = 75 * 60 * 1000; // 75 minutes for 70 questions
+    const STORAGE_KEY = 'ap_physics_quiz_2024';
+
+    let examData = null;
+    let answers = {}; // {questionNumber: 'C'}
+    let currentQ = 0;
+    let timerInterval = null;
+    let timeLeft = QUIZ_DURATION;
+    let submitted = false;
+
+    // ===== Load exam data =====
+    async function loadExamData() {
+        try {
+            const r = await fetch('/data/exam.json');
+            if (!r.ok) throw new Error('not found');
+            examData = await r.json();
+            initQuiz();
+        } catch (e) {
+            showNoData();
+        }
+    }
+
+    function showNoData() {
+        document.getElementById('questionContent').innerHTML = `
+            <div class="loading-msg">
+                <div class="spinner">⏳</div>
+                <div data-i18n="data_loading">${I18n.t('data_loading')}</div>
+            </div>`;
+    }
+
+    function initQuiz() {
+        // Load saved progress
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.answers) answers = data.answers;
+                if (data.currentQ !== undefined) currentQ = data.currentQ;
+                if (data.timeLeft !== undefined) timeLeft = data.timeLeft;
+            } catch(e) {}
+        }
+
+        buildNavGrid();
+        buildNotebookDots();
+        showQuestion(currentQ);
+        startTimer();
+        saveProgress();
+    }
+
+    function buildNavGrid() {
+        const grid = document.getElementById('navGrid');
+        grid.innerHTML = '';
+        for (let i = 0; i < TOTAL_Q; i++) {
+            const cell = document.createElement('button');
+            cell.className = 'nav-cell' + (answers[i + 1] !== undefined ? ' answered' : '') + (i === currentQ ? ' current' : '');
+            cell.textContent = i + 1;
+            cell.onclick = () => goToQuestion(i);
+            grid.appendChild(cell);
+        }
+    }
+
+    function buildNotebookDots() {
+        const dots = document.getElementById('notebookDots');
+        dots.innerHTML = '';
+        for (let i = 0; i < 20; i++) {
+            const d = document.createElement('div');
+            d.className = 'notebook-dot';
+            dots.appendChild(d);
+        }
+    }
+
+    function showQuestion(idx) {
+        if (!examData) return;
+        currentQ = idx;
+
+        const qData = examData.questions[idx];
+        const qNum = idx + 1;
+
+        // Update question panel
+        const qContent = document.getElementById('questionContent');
+        let html = `
+            <div class="q-meta">
+                <span>${I18n.t('q_of').replace('%d', qNum)}</span>
+                <span class="q-meta-line"></span>
+            </div>
+            <div class="q-number">${qNum}</div>
+        `;
+        if (qData && qData.image) {
+            html += `<img class="question-image" id="qImg" src="images/${qData.image}" alt="Question ${qNum}" onclick="openLightbox(this.src)">`;
+        }
+        qContent.innerHTML = html;
+
+        // Update options (A-E buttons - options are in the image)
+        const optsContainer = document.getElementById('optionsContainer');
+        const letters = ['A','B','C','D','E'];
+        let optsHtml = '';
+        for (let i = 0; i < letters.length; i++) {
+            const letter = letters[i];
+            const selected = answers[qNum] === letter;
+            optsHtml += `
+                <div class="option${selected ? ' selected' : ''}" data-opt="${letter}" onclick="selectOption('${letter}')">
+                    <div class="opt-check"></div>
+                    <span class="opt-label">${letter}</span>
+                </div>`;
+        }
+        optsContainer.innerHTML = optsHtml;
+
+        // Update nav
+        document.querySelectorAll('.nav-cell').forEach((cell, i) => {
+            cell.classList.toggle('current', i === currentQ);
+            cell.classList.toggle('answered', answers[i + 1] !== undefined);
+        });
+
+        // Prev/Next
+        document.getElementById('prevBtn').disabled = currentQ === 0;
+        document.getElementById('nextBtn').textContent = currentQ === TOTAL_Q - 1 ? I18n.t('btn_submit') : I18n.t('btn_next');
+
+        saveProgress();
+    }
+
+    function selectOption(letter) {
+        if (submitted) return;
+        const qNum = currentQ + 1;
+        answers[qNum] = letter;
+
+        // Update option UI
+        document.querySelectorAll('.option').forEach((opt) => {
+            opt.classList.toggle('selected', opt.dataset.opt === letter);
+        });
+
+        // Update nav cell
+        const cells = document.querySelectorAll('.nav-cell');
+        cells[currentQ].classList.add('answered');
+
+        saveProgress();
+
+        // Auto-advance to next question after short delay
+        if (currentQ < TOTAL_Q - 1) {
+            setTimeout(() => nextQuestion(), 200);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQ > 0) showQuestion(currentQ - 1);
+    }
+
+    function nextQuestion() {
+        if (currentQ < TOTAL_Q - 1) showQuestion(currentQ + 1);
+    }
+
+    function goToQuestion(idx) {
+        showQuestion(idx);
+    }
+
+    // ===== Timer =====
+    function startTimer() {
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            timeLeft -= 1000;
+            if (timeLeft <= 0) {
+                timeLeft = 0;
+                clearInterval(timerInterval);
+                if (!submitted) submitQuiz();
+            }
+            updateTimerDisplay();
+            saveProgress();
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const ms = Math.max(0, timeLeft);
+        const mins = Math.floor(ms / 60000);
+        const secs = Math.floor((ms % 60000) / 1000);
+        document.getElementById('timerDisplay').textContent =
+            String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+
+        const pct = Math.round((1 - ms / QUIZ_DURATION) * 100);
+        document.getElementById('timerProgress').textContent = pct + '%';
+        document.getElementById('timerBarFill').style.width = pct + '%';
+    }
+
+    // ===== Submit =====
+    function showSubmitModal() {
+        const unanswered = TOTAL_Q - Object.keys(answers).length;
+        document.getElementById('confirmInfo').textContent =
+            unanswered > 0 ? I18n.t('unanswered_count').replace('%d', unanswered) : '';
+        document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.remove('open');
+    }
+
+    function submitQuiz() {
+        closeConfirmModal();
+        clearInterval(timerInterval);
+        submitted = true;
+        localStorage.removeItem(STORAGE_KEY);
+
+        if (!examData) return;
+
+        // Calculate score
+        let correct = 0;
+        for (let i = 0; i < TOTAL_Q; i++) {
+            const qData = examData.questions[i];
+            const userAns = answers[i + 1];
+            if (userAns && qData && userAns === qData.answer) {
+                correct++;
+            }
+        }
+
+        // AP score conversion (simplified - roughly 70%+ for 5, etc.)
+        const pct = correct / TOTAL_Q;
+        let apScore = 1;
+        if (pct >= 0.75) apScore = 5;
+        else if (pct >= 0.60) apScore = 4;
+        else if (pct >= 0.45) apScore = 3;
+        else if (pct >= 0.30) apScore = 2;
+
+        showResults(correct, apScore);
+    }
+
+    function showResults(correct, apScore) {
+        document.getElementById('quizWrapper').style.display = 'none';
+        const rp = document.getElementById('resultsPage');
+        rp.style.display = 'block';
+
+        // Score ring animation
+        const pct = correct / TOTAL_Q;
+        const circumference = 2 * Math.PI * 70;
+        const offset = circumference * (1 - pct);
+        setTimeout(() => {
+            document.getElementById('scoreRingFill').style.strokeDashoffset = offset;
+        }, 100);
+
+        document.getElementById('scoreNumber').textContent = correct + '/' + TOTAL_Q;
+
+        // AP score badge
+        const badge = document.getElementById('apScoreBadge');
+        badge.textContent = 'AP ' + apScore;
+        badge.className = 'ap-score-badge ap-' + apScore;
+
+        // Breakdown
+        const unanswered = TOTAL_Q - Object.keys(answers).length;
+        document.getElementById('resultsBreakdown').innerHTML = `
+            <span class="label">${I18n.t('score_label')}</span> ${correct}/${TOTAL_Q}<br>
+            <span class="label">${I18n.t('unanswered')}</span> ${unanswered}
+        `;
+
+        // Save to history
+        saveToHistory({ score: correct, total: TOTAL_Q, ap: apScore, date: new Date().toISOString() });
+    }
+
+    function reviewWrong() {
+        if (!examData) return;
+        const list = document.getElementById('wrongList');
+        let html = '';
+        for (let i = 0; i < TOTAL_Q; i++) {
+            const qNum = i + 1;
+            const qData = examData.questions[i];
+            const userAns = answers[qNum];
+            if (userAns && qData && userAns !== qData.answer) {
+                html += `
+                    <div class="wrong-item" style="margin-bottom:10px;padding:14px 18px;background:var(--paper);border:1px solid var(--paper-shadow);border-radius:10px;margin-bottom:10px;">
+                        <div style="font-family:var(--font-serif);font-weight:500;font-size:0.95rem;">${I18n.t('q_of').replace('%d', qNum)}</div>
+                        <div style="font-size:0.82rem;color:var(--ink-light);margin-top:4px;">
+                            ${I18n.t('choose_answer')}: <span style="color:var(--error);text-decoration:line-through;">${userAns}</span>
+                            &nbsp;&nbsp;
+                            Correct: <span style="color:var(--success);font-weight:600;">${qData.answer}</span>
+                        </div>
+                    </div>`;
+            }
+        }
+        list.innerHTML = html || '<div style="text-align:center;color:var(--ink-light);padding:24px;">🎉</div>';
+        document.getElementById('wrongModal').classList.add('open');
+    }
+
+    function closeWrongModal() {
+        document.getElementById('wrongModal').classList.remove('open');
+    }
+
+    // ===== Lightbox =====
+    function openLightbox(src) {
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('lightbox').classList.add('open');
+    }
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('open');
+    }
+
+    // ===== Progress =====
+    function saveProgress() {
+        if (submitted) return;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            answers, currentQ, timeLeft
+        }));
+    }
+
+    function saveToHistory(result) {
+        try {
+            const key = 'ap_physics_history';
+            const history = JSON.parse(localStorage.getItem(key) || '[]');
+            history.unshift(result);
+            localStorage.setItem(key, JSON.stringify(history.slice(0, 20)));
+        } catch(e) {}
+    }
+
+    // ===== Init =====
+    I18n.onSwitch(() => {
+        if (examData) showQuestion(currentQ);
+    });
+
+    loadExamData();
+    </script>
+</body>
+</html>

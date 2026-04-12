@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 / 注册 · AP Physics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4A90D9; --primary-dark: #2C5282;
+            --primary-light: #E8F0F8; --bg: #F5F7FA;
+            --paper: #FFFFFF; --ink: #1A202C;
+            --ink-light: #718096; --warm: #E2E8F0;
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg); min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .login-card {
+            background: var(--paper); border-radius: 20px;
+            padding: 40px 36px; width: 90%; max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        }
+        .login-card h1 {
+            font-family: 'Playfair Display', serif; font-size: 1.8rem;
+            font-weight: 600; text-align: center; margin-bottom: 8px;
+            color: var(--primary-dark);
+        }
+        .login-card .subtitle {
+            text-align: center; color: var(--ink-light); font-size: 0.88rem;
+            margin-bottom: 28px;
+        }
+        .tabs { display: flex; border-bottom: 1px solid var(--warm); margin-bottom: 24px; }
+        .tab {
+            flex: 1; padding: 10px; text-align: center; cursor: pointer;
+            font-size: 0.9rem; color: var(--ink-light); border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 500; }
+        .tab:hover:not(.active) { color: var(--ink); }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.82rem; color: var(--ink-light); margin-bottom: 6px; }
+        .form-group input {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--warm);
+            border-radius: 10px; font-size: 0.95rem; font-family: inherit;
+            background: var(--bg); color: var(--ink); outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus { border-color: var(--primary); }
+        .submit-btn {
+            width: 100%; padding: 12px; background: var(--primary); color: white;
+            border: none; border-radius: 14px; font-size: 0.95rem;
+            font-family: inherit; font-weight: 500; cursor: pointer;
+            transition: opacity 0.2s; margin-top: 8px;
+        }
+        .submit-btn:hover { opacity: 0.9; }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .error-msg { color: #f56565; font-size: 0.82rem; margin-top: 8px; text-align: center; min-height: 20px; }
+        .success-msg { color: #48bb78; font-size: 0.82rem; margin-top: 8px; text-align: center; min-height: 20px; }
+
+        .back-link { text-align: center; margin-top: 20px; }
+        .back-link a { color: var(--ink-light); text-decoration: none; font-size: 0.85rem; }
+        .back-link a:hover { color: var(--primary); }
+
+        .demo-note {
+            text-align: center; margin-top: 20px; padding: 12px;
+            background: var(--primary-light); border-radius: 10px;
+            font-size: 0.78rem; color: var(--ink-light); line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1>AP Physics 1</h1>
+        <p class="subtitle">在线练习系统</p>
+
+        <div class="tabs">
+            <div class="tab active" id="tabLogin" onclick="switchTab('login')">登录</div>
+            <div class="tab" id="tabRegister" onclick="switchTab('register')">注册</div>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="loginUsername" required placeholder="输入用户名">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="loginPassword" required placeholder="输入密码">
+            </div>
+            <button type="submit" class="submit-btn" id="loginBtn">登录</button>
+            <div class="error-msg" id="loginError"></div>
+            <div class="success-msg" id="loginSuccess"></div>
+        </form>
+
+        <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="regUsername" required placeholder="选择用户名">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="regPassword" required placeholder="设置密码">
+            </div>
+            <div class="form-group">
+                <label>确认密码</label>
+                <input type="password" id="regPassword2" required placeholder="再次输入密码">
+            </div>
+            <button type="submit" class="submit-btn" id="regBtn">注册</button>
+            <div class="error-msg" id="regError"></div>
+            <div class="success-msg" id="regSuccess"></div>
+        </form>
+
+        <div class="demo-note">
+            演示说明：注册和登录数据保存在浏览器本地存储中。<br>
+            Demo: Registration data is stored in browser localStorage.
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← 返回首页</a>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+    function switchTab(tab) {
+        document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+        document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+        document.getElementById('loginForm').style.display = tab === 'login' ? '' : 'none';
+        document.getElementById('registerForm').style.display = tab === 'register' ? '' : 'none';
+        clearMsgs();
+    }
+
+    function clearMsgs() {
+        document.getElementById('loginError').textContent = '';
+        document.getElementById('loginSuccess').textContent = '';
+        document.getElementById('regError').textContent = '';
+        document.getElementById('regSuccess').textContent = '';
+    }
+
+    async function handleLogin(e) {
+        e.preventDefault();
+        const btn = document.getElementById('loginBtn');
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const errorEl = document.getElementById('loginError');
+        const successEl = document.getElementById('loginSuccess');
+
+        btn.disabled = true;
+        btn.textContent = '登录中...';
+        errorEl.textContent = '';
+        successEl.textContent = '';
+
+        try {
+            const result = await API.login(username, password);
+            localStorage.setItem('physics_user', JSON.stringify(result.user));
+            localStorage.setItem('physics_token', result.token);
+            successEl.textContent = '登录成功！';
+            setTimeout(() => location.href = 'index.html', 800);
+        } catch (err) {
+            errorEl.textContent = err.message || '登录失败';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '登录';
+        }
+    }
+
+    async function handleRegister(e) {
+        e.preventDefault();
+        const btn = document.getElementById('regBtn');
+        const username = document.getElementById('regUsername').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const password2 = document.getElementById('regPassword2').value;
+        const errorEl = document.getElementById('regError');
+        const successEl = document.getElementById('regSuccess');
+
+        btn.disabled = true;
+        btn.textContent = '注册中...';
+        errorEl.textContent = '';
+        successEl.textContent = '';
+
+        if (password !== password2) {
+            errorEl.textContent = '两次密码不一致';
+            btn.disabled = false;
+            btn.textContent = '注册';
+            return;
+        }
+
+        if (password.length < 4) {
+            errorEl.textContent = '密码至少4个字符';
+            btn.disabled = false;
+            btn.textContent = '注册';
+            return;
+        }
+
+        try {
+            const result = await API.register(username, password);
+            localStorage.setItem('physics_user', JSON.stringify(result.user));
+            localStorage.setItem('physics_token', result.token);
+            successEl.textContent = '注册成功！';
+            setTimeout(() => location.href = 'index.html', 800);
+        } catch (err) {
+            errorEl.textContent = err.message || '注册失败';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '注册';
+        }
+    }
+    </script>
+</body>
+</html>
