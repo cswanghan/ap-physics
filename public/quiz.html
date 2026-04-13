@@ -171,6 +171,8 @@
         .nav-legend-dot.answered { background: var(--primary); }
         .nav-legend-dot.unanswered { border: 2px solid var(--paper-shadow); }
         .nav-legend-dot.current { border: 2px solid var(--primary); box-shadow: 0 0 0 2px var(--primary-faint); }
+        .nav-cell.nav-correct { background: var(--success); border-color: var(--success); color: white; }
+        .nav-cell.nav-wrong { background: var(--error); border-color: var(--error); color: white; }
 
         /* Sidebar submit */
         .sidebar-submit {
@@ -196,6 +198,14 @@
             color: var(--ink); line-height: 1.1; margin-bottom: 4px;
         }
         .q-sub { font-family: var(--font-serif); font-size: 1rem; color: var(--ink-med); font-style: italic; margin-bottom: 20px; }
+
+        /* Question text (text-based MCQ) */
+        .question-text {
+            font-size: 1rem; line-height: 1.8; color: var(--ink);
+            margin-bottom: 16px; padding: 16px 20px;
+            background: var(--primary-light); border-radius: 10px;
+            border: 1px solid var(--warm);
+        }
 
         /* Question image */
         .question-image {
@@ -668,7 +678,7 @@
     <script>
     // ===== Quiz State =====
     const TOTAL_Q = 70;
-    const QUIZ_DURATION = 75 * 60 * 1000; // 75 minutes for 70 questions
+    const QUIZ_DURATION = 90 * 60 * 1000; // 90 minutes for 70 questions
     const STORAGE_KEY = 'ap_physics_quiz_2024';
 
     let examData = null;
@@ -755,37 +765,99 @@
             </div>
             <div class="q-number">${qNum}</div>
         `;
+        // Render question text if available (text-based MCQ)
+        if (qData && qData.text) {
+            html += `<div class="question-text">${qData.text}</div>`;
+        }
+        // Render question image if available (image-based MCQ)
         if (qData && qData.image) {
             html += `<img class="question-image" id="qImg" src="images/${qData.image}" alt="Question ${qNum}" onclick="openLightbox(this.src)">`;
         }
         qContent.innerHTML = html;
 
-        // Update options (A-E buttons - options are in the image)
+        // Update options — use text labels from data if available, else just letter
         const optsContainer = document.getElementById('optionsContainer');
-        const letters = ['A','B','C','D','E'];
+        const optKeys = qData.options ? Object.keys(qData.options) : ['A','B','C','D'];
+        const userAns = answers[qNum];
         let optsHtml = '';
-        for (let i = 0; i < letters.length; i++) {
-            const letter = letters[i];
-            const selected = answers[qNum] === letter;
+        for (const letter of optKeys) {
+            const selected = userAns === letter;
+            const optText = qData.options ? qData.options[letter] : letter;
+            let cls = 'option';
+            if (submitted) {
+                cls += ' disabled';
+                if (selected) cls += letter === qData.answer ? ' correct selected' : ' wrong selected';
+                else if (letter === qData.answer) cls += ' correct';
+            } else if (selected) {
+                cls += ' selected';
+            }
             optsHtml += `
-                <div class="option${selected ? ' selected' : ''}" data-opt="${letter}" onclick="selectOption('${letter}')">
+                <div class="${cls}" data-opt="${letter}" onclick="selectOption('${letter}')">
                     <div class="opt-check"></div>
-                    <span class="opt-label">${letter}</span>
+                    <span class="opt-label"><strong>${letter}.</strong> ${optText}</span>
                 </div>`;
         }
         optsContainer.innerHTML = optsHtml;
+
+        // Feedback: only after quiz submitted
+        const fb = document.getElementById('feedbackBox');
+        if (submitted && userAns) {
+            const ok = userAns === qData.answer;
+            fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
+            fb.textContent = ok ? 'Correct!' : `Wrong — correct answer: ${qData.answer}`;
+        } else if (submitted && !userAns) {
+            fb.className = 'feedback show';
+            fb.style.background = '#f5f3f0'; fb.style.color = 'var(--ink-light)';
+            fb.textContent = `Unanswered — correct answer: ${qData.answer}`;
+        } else {
+            fb.className = 'feedback';
+            fb.style.background = ''; fb.style.color = '';
+        }
+
+        // Explanation: show after quiz submitted if data available
+        const expPanel = document.getElementById('explanationBox');
+        if (submitted && qData && qData.explanation) {
+            let expHtml = `<div class="exp-title">Explanation`;
+            if (qData.knowledge_point) expHtml += ` <span class="exp-tag">${qData.knowledge_point}</span>`;
+            expHtml += `</div>`;
+            expHtml += `<div>${qData.explanation}</div>`;
+            if (qData.solution_steps && qData.solution_steps.length) {
+                expHtml += `<ol class="exp-steps">${qData.solution_steps.map(s => `<li>${s}</li>`).join('')}</ol>`;
+            }
+            if (qData.difficulty_note) {
+                expHtml += `<div class="exp-note">${qData.difficulty_note}</div>`;
+            }
+            expPanel.innerHTML = expHtml;
+            expPanel.className = 'explanation-panel show';
+        } else {
+            expPanel.className = 'explanation-panel';
+            expPanel.innerHTML = '';
+        }
 
         // Update nav
         document.querySelectorAll('.nav-cell').forEach((cell, i) => {
             cell.classList.toggle('current', i === currentQ);
             cell.classList.toggle('answered', answers[i + 1] !== undefined);
+            // In review mode, highlight correct/wrong in nav
+            if (submitted) {
+                const qd = examData.questions[i];
+                const ua = answers[i + 1];
+                cell.classList.remove('nav-correct', 'nav-wrong');
+                if (ua && qd && ua === qd.answer) cell.classList.add('nav-correct');
+                else if (ua && qd && ua !== qd.answer) cell.classList.add('nav-wrong');
+            }
         });
 
         // Prev/Next
         document.getElementById('prevBtn').disabled = currentQ === 0;
-        document.getElementById('nextBtn').textContent = currentQ === TOTAL_Q - 1 ? I18n.t('btn_submit') : I18n.t('btn_next');
+        if (submitted) {
+            document.getElementById('nextBtn').textContent = currentQ === TOTAL_Q - 1 ? I18n.t('btn_back_home') : I18n.t('btn_next');
+            document.getElementById('submitBtn').style.display = 'none';
+        } else {
+            document.getElementById('nextBtn').textContent = currentQ === TOTAL_Q - 1 ? I18n.t('btn_submit') : I18n.t('btn_next');
+        }
 
-        saveProgress();
+        if (!submitted) saveProgress();
     }
 
     function selectOption(letter) {
@@ -813,6 +885,8 @@
 
     function nextQuestion() {
         if (currentQ < TOTAL_Q - 1) showQuestion(currentQ + 1);
+        else if (submitted) { location.href = 'index.html'; }
+        else showSubmitModal();
     }
 
     function goToQuestion(idx) {
@@ -909,11 +983,19 @@
         badge.textContent = 'AP ' + apScore;
         badge.className = 'ap-score-badge ap-' + apScore;
 
-        // Breakdown
-        const unanswered = TOTAL_Q - Object.keys(answers).length;
+        // Breakdown: correct / wrong / unanswered / percentage / AP score
+        const answered = Object.keys(answers).length;
+        const unanswered = TOTAL_Q - answered;
+        const wrong = answered - correct;
+        const percentage = Math.round((correct / TOTAL_Q) * 100);
         document.getElementById('resultsBreakdown').innerHTML = `
-            <span class="label">${I18n.t('score_label')}</span> ${correct}/${TOTAL_Q}<br>
-            <span class="label">${I18n.t('unanswered')}</span> ${unanswered}
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;line-height:2;">
+                <span class="label" style="color:var(--success);">&#10003; Correct</span> <span>${correct}</span>
+                <span class="label" style="color:var(--error);">&#10007; Wrong</span> <span>${wrong}</span>
+                <span class="label" style="color:var(--ink-light);">&#8212; Unanswered</span> <span>${unanswered}</span>
+                <span class="label">Accuracy</span> <span>${percentage}%</span>
+                <span class="label">Estimated AP Score</span> <span style="font-weight:600;">${apScore} / 5</span>
+            </div>
         `;
 
         // Save to history
@@ -922,26 +1004,44 @@
 
     function reviewWrong() {
         if (!examData) return;
+        // Show the quiz view for reviewing
+        document.getElementById('resultsPage').style.display = 'none';
+        document.getElementById('quizWrapper').style.display = '';
+        showQuestion(currentQ); // Refresh to show correct/wrong state
+
         const list = document.getElementById('wrongList');
         let html = '';
+        let wrongIndices = [];
         for (let i = 0; i < TOTAL_Q; i++) {
             const qNum = i + 1;
             const qData = examData.questions[i];
             const userAns = answers[qNum];
-            if (userAns && qData && userAns !== qData.answer) {
+            // Show wrong AND unanswered questions
+            if (!userAns || (qData && userAns !== qData.answer)) {
+                wrongIndices.push(i);
+                const isUnanswered = !userAns;
                 html += `
-                    <div class="wrong-item" style="margin-bottom:10px;padding:14px 18px;background:var(--paper);border:1px solid var(--paper-shadow);border-radius:10px;margin-bottom:10px;">
+                    <div class="wrong-item" style="margin-bottom:10px;padding:14px 18px;background:var(--paper);border:1px solid var(--paper-shadow);border-radius:10px;cursor:pointer;" onclick="goToWrongQuestion(${i})">
                         <div style="font-family:var(--font-serif);font-weight:500;font-size:0.95rem;">${I18n.t('q_of').replace('%d', qNum)}</div>
                         <div style="font-size:0.82rem;color:var(--ink-light);margin-top:4px;">
-                            ${I18n.t('choose_answer')}: <span style="color:var(--error);text-decoration:line-through;">${userAns}</span>
+                            ${isUnanswered
+                                ? `<span style="color:var(--ink-light);">Unanswered</span>`
+                                : `${I18n.t('choose_answer')}: <span style="color:var(--error);text-decoration:line-through;">${userAns}</span>`}
                             &nbsp;&nbsp;
                             Correct: <span style="color:var(--success);font-weight:600;">${qData.answer}</span>
                         </div>
                     </div>`;
             }
         }
-        list.innerHTML = html || '<div style="text-align:center;color:var(--ink-light);padding:24px;">🎉</div>';
+        list.innerHTML = html || '<div style="text-align:center;color:var(--ink-light);padding:24px;">All correct!</div>';
         document.getElementById('wrongModal').classList.add('open');
+    }
+
+    function goToWrongQuestion(idx) {
+        closeWrongModal();
+        // Scroll answer panel to top to see feedback/explanation
+        showQuestion(idx);
+        document.getElementById('answerPanel').scrollTop = 0;
     }
 
     function closeWrongModal() {
